@@ -97,7 +97,7 @@ variable [GetSetEraseElem? C ι α Valid]
 @[simp]
 lemma getElem?_setElem_self (c : C) (i : ι) (x : α) :
     c[i ↦ x][i]? = x := by
-  rw [getElem?_pos, getElem_setElem_self]
+  rw [getElem?_pos _ _ (by get_elem_tactic), getElem_setElem_self]
 
 @[simp]
 lemma getElem?_setElem_of_ne (c : C) {i : ι} (x : α) {j : ι} (hij : i ≠ j) :
