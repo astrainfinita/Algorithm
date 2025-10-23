@@ -516,7 +516,7 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
   congr!
   rw [iff_not_comm]
   push_neg
-  rw [not_false_eq_true, exists_true_iff_nonempty]
+  rw [exists_true_iff_nonempty]
   rfl
 
 lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
