@@ -446,9 +446,9 @@ protected theorem induction_on {p : (Π₀' i, [β i, d i]) → Prop} (x : Π₀
       p (zipWith f (fun _ ↦ hf₁ _ _) (single d i b) x)) :
     p x := by
   cases x with | _ x s
-  induction' s using Trunc.induction_on with s
+  induction s using Trunc.induction_on with | h s
   cases s with | _ s H
-  induction' s using Multiset.induction_on with i s ih generalizing x
+  induction s using Multiset.induction_on generalizing x with | empty | cons i s ih
   · have : x = d := funext fun i => (H i).resolve_left (Multiset.notMem_zero _)
     subst this
     exact h0
@@ -516,7 +516,7 @@ theorem support_mk'_subset {f : ∀ i, β i} {s : Multiset ι} {h} :
 @[simp]
 theorem mem_support_toFun (f : Π₀' i, [β i, d i]) (i) : i ∈ f.support ↔ f i ≠ d i := by
   cases f with | _ f s
-  induction' s using Trunc.induction_on with s
+  induction s using Trunc.induction_on with | h s
   dsimp only [support, Trunc.lift_mk]
   rw [Finset.mem_filter, Multiset.mem_toFinset, coe_mk']
   exact and_iff_right_of_imp (s.prop i).resolve_right
