@@ -226,7 +226,7 @@ instance : Front (List α) α where
   frontD := List.headD
   front l h := l.head <| List.not_isEmpty_iff.mp h
   frontD_def := List.headD_eq_head?
-  front_mem _ _ := List.head?_eq_head _
+  front_mem _ _ := List.head?_eq_some_head _
 
 instance : PopFront (List α) α where
   popFront := List.tail
