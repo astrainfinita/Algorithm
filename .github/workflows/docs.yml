@@ -25,8 +25,16 @@ jobs:
       - name: Build Doc
         run: |
           cd docbuild
-          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4 algorithm
-          lake build algorithm:docs
+      - name: build doc-gen4
+        run: |
+          env DISABLE_EQUATIONS=1 lake build doc-gen4
+      - name: build import graph
+        run: |
+          lake exe graph algorithm.html
+      - name: generate docs
+        run: |
+          lake build Algorithm:docs
+          lake build Algorithm:docsHeader
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
