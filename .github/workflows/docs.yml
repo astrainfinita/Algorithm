@@ -24,8 +24,8 @@ jobs:
           use-github-cache: false
       - name: Build Doc
         run: |
+          lake exe graph ./docbuild/algorithm.html
           cd docbuild
-          lake exe graph algorithm.html
           lake build Algorithm:docs
           lake build Algorithm:docsHeader
       - name: Setup Pages
