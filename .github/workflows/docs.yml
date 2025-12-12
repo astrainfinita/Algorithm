@@ -25,14 +25,7 @@ jobs:
       - name: Build Doc
         run: |
           cd docbuild
-      - name: build doc-gen4
-        run: |
-          env DISABLE_EQUATIONS=1 lake build doc-gen4
-      - name: build import graph
-        run: |
           lake exe graph algorithm.html
-      - name: generate docs
-        run: |
           lake build Algorithm:docs
           lake build Algorithm:docsHeader
       - name: Setup Pages
