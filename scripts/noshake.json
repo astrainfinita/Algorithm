@@ -137,6 +137,7 @@
   "Mathlib.Tactic.NormNum.Eq",
   "Mathlib.Tactic.NormNum.Ineq",
   "Mathlib.Tactic.NthRewrite",
+  "Mathlib.Tactic.Order",
   "Mathlib.Tactic.PPWithUniv",
   "Mathlib.Tactic.Peel",
   "Mathlib.Tactic.Polyrith",
@@ -193,6 +194,4 @@
   "Mathlib.Util.WithWeakNamespace",
   "Qq"],
  "ignoreAll":
- ["Batteries.Tactic.Basic", "Mathlib.Mathport.Syntax", "Mathlib.Tactic.Linter"],
- "ignore":
- {}}
+ ["Batteries.Tactic.Basic", "Mathlib.Mathport.Syntax", "Mathlib.Tactic.Linter"]}

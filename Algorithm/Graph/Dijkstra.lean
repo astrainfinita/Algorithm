@@ -6,11 +6,12 @@ Authors: Yuyang Zhao
 import Algorithm.Data.Classes.ToList
 import Algorithm.Data.Classes.IndexedMinHeap
 import Algorithm.Data.Graph.AdjList
+import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Algebra.Order.Monoid.WithTop
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Set.Lattice
-import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+import Mathlib.Tactic.Order
 
 section -- should be in mathlb
 variable {γ : Type*}
@@ -415,7 +416,7 @@ lemma dijkstraStep_snd_getElem_eq_top (g : G) (c : Info → CostType)
     (heap : DistHeap) (res : DistArray) (hMinIdx : heap[minIdx heap] ≠ ⊤) (v : V) :
     (dijkstraStep g c heap res hMinIdx).2[v] = ⊤ ↔
       v ≠ minIdx heap ∧ res[v] = ⊤ := by
-  letI : DecidableEq V := by classical infer_instance
+  let +nondep : DecidableEq V := by classical infer_instance
   simp [dijkstraStep_snd_getElem]
   split_ifs with h
   · simpa [h]
@@ -493,7 +494,7 @@ lemma dijkstraStep_fst_getElem (g : G) (c : Info → CostType)
   · rintro ⟨x, hx, rfl, rfl, rfl⟩
     exact ⟨homOfStar x hx, rfl⟩
   · rintro ⟨⟨⟨v, x, hx⟩, ⟨fste, snde⟩⟩, rfl⟩
-    simp at fste snde; subst fste snde
+    simp only [EmbeddingLike.apply_eq_iff_eq] at fste snde; subst fste snde
     exact ⟨x, hx, rfl, rfl⟩
 
 lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
@@ -504,8 +505,8 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
     (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) (v : V) :
     (dijkstraStep g c heap res hMinIdx).1[v] = ⊤ ↔
       (heap[v] = ⊤ ∧ v ∉ g..succSet {minIdx heap}) ∨ v = minIdx heap ∨ res[v] ≠ ⊤ := by
-  letI : DecidableEq V := by classical infer_instance
-  letI : DecidableEq Info := by classical infer_instance
+  let +nondep : DecidableEq V := by classical infer_instance
+  let +nondep : DecidableEq Info := by classical infer_instance
   dsimp
   rw [dijkstraStep_fst_getElem (spec₁ := spec₁)]
   simp? [hMinIdx, - not_or] says
@@ -542,8 +543,8 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     (h : dijkstraStep.Spec g c init heap res) (hMinIdx : heap[minIdx heap] ≠ ⊤) :
     dijkstraStep.Spec g c init (dijkstraStep g c heap res hMinIdx).1
       (dijkstraStep g c heap res hMinIdx).2 := by
-  letI : DecidableEq V := by classical infer_instance
-  letI : DecidableEq Info := by classical infer_instance
+  let +nondep : DecidableEq V := by classical infer_instance
+  let +nondep : DecidableEq Info := by classical infer_instance
   obtain ⟨h₁, h₂, h₃, h₄⟩ := h
   have rMinIdx : res[minIdx heap] = ⊤ := (h₁ _).resolve_left hMinIdx
   constructor
@@ -655,11 +656,14 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
           exact ⟨v, t, hv, ht, p, e, .nil, rfl⟩
       obtain ⟨v, w, hv, hw, psv, evw, pwt, rfl⟩ := this _ rMinIdx p
       simp only [Quiver.Path.cost_comp, Quiver.Path.cost_cons, WithTop.coe_add, ← add_assoc]
-      apply le_add_right
       obtain ⟨d, hd, (⟨rfl, h₂⟩ | ⟨-, h₂⟩)⟩ := h₂ w hw; · exact (h₂ v hv).elim evw
       replace h₃ := (h₃ v hv).2 s inits psv
-      exact (getElem_minIdx_le heap w).trans <| hd.symm ▸
-        (min_le_right _ _).trans <| (h₂ v hv evw).trans (add_le_add_right h₃ _)
+      calc
+        heap[minIdx heap]
+          ≤ heap[w]                     := getElem_minIdx_le heap w
+        _ ≤ d                           := by order only [hd]
+        _ ≤ res[v] + c (evw : E g).info := h₂ v hv evw
+        _ ≤ _                           := by grw [h₃]; exact self_le_add_right _ _
   · intro v
     -- simp? [dijkstraStep_snd_getElem_eq_top, dijkstraStep_fst_getElem_eq_top (spec₁ := h₁), h₄]
     simp only [ne_eq, h₄, dijkstraStep_snd_support,
@@ -690,7 +694,7 @@ where
     else
       let hr := g..dijkstraStep c heap res hh
       have : Fintype.card {v : V | hr.2[v] = ⊤} < Fintype.card {v : V | res[v] = ⊤} := by
-        letI : DecidableEq V := by classical infer_instance
+        let +nondep : DecidableEq V := by classical infer_instance
         simp only [dijkstraStep_snd_getElem_eq_top, ne_eq, Set.coe_setOf, hr]
         exact Fintype.card_lt_of_injective_of_notMem (fun ⟨v, hv⟩ ↦ ⟨v, hv.2⟩)
           (by intro ⟨v, hv⟩ ⟨w, hw⟩; simp)
