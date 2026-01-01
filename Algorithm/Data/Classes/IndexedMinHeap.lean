@@ -52,7 +52,7 @@ lemma decreaseKeysD_getElem [DecidableEq ι] {ια : Type*} [ToList ια (ι × 
   | cons hd tl ih =>
     rw [List.foldl_cons, ih, decreaseKeyD_getElem]
     split_ifs with h
-    · simp only [List.filterMap_cons, h, List.foldr_cons, min_assoc]
+    · simp only [List.filterMap_cons, h, min_assoc]
       congr
     · simp [h]
 
@@ -178,7 +178,7 @@ lemma getElem_minIdx (c : DefaultDictWithHeap C C') (h : ¬isEmpty c.minHeap) :
   c.getElem_minIdx' h
 
 instance : Inhabited (DefaultDictWithHeap C C') where
-  default := ⟨default, ∅, by simp, by simp [size_eq_card_toMultiset]⟩
+  default := ⟨default, ∅, by simp, by simp [sizeTM_eq_card_toMultiset, isEmpty_iff_sizeTM_eq_zero]⟩
 
 def mk [DecidableEq α] (defaultDict : C) (minHeap : C')
     (mem_minHeap : ∀ i : ι, (hi : defaultDict[i] ≠ ⊤) → ⟨(defaultDict[i]).untop hi, i⟩ ∈ minHeap) :
@@ -189,8 +189,8 @@ def mk [DecidableEq α] (defaultDict : C) (minHeap : C')
     ⟨defaultDict, minHeap, mem_minHeap, fun _ ↦ h'⟩
   else
     haveI : DecidableEq (WithIdx α ι) := by classical infer_instance
-    have : size (MinHeap.tail minHeap) < size minHeap := by
-      simpa [h, size_eq_card_toMultiset, Multiset.card_erase_lt_of_mem] using
+    have : sizeTM (MinHeap.tail minHeap) < sizeTM minHeap := by
+      simpa [h, sizeTM_eq_card_toMultiset, Multiset.card_erase_lt_of_mem] using
         Multiset.card_erase_lt_of_mem (MinHeap.head_mem_toMultiset _ _)
     mk defaultDict (MinHeap.tail minHeap) fun i hi ↦ by
       simp only [← mem_toMultiset, MinHeap.toMultiset_tail, h, Bool.false_eq_true, ↓reduceDIte,
@@ -200,7 +200,7 @@ def mk [DecidableEq α] (defaultDict : C) (minHeap : C')
       · intro h''
         apply h'
         simp [← h'', MinHeap.head_def]
-termination_by size minHeap
+termination_by sizeTM minHeap
 
 @[simp, nolint unusedHavesSuffices] -- false positive
 lemma mk_defaultDict [DecidableEq α] (defaultDict : C) (minHeap : C')
@@ -256,28 +256,11 @@ instance [Inhabited ι] [DecidableEq α] :
     · suffices ∀ i : ι, c[i] = ⊤ by simp [this]
       intro i
       contrapose h with hi
-      simpa [size_eq_card_toMultiset, Multiset.eq_zero_iff_forall_notMem] using
-        ⟨_, c.mem_minHeap i hi⟩
+      simpa [sizeTM_eq_card_toMultiset, Multiset.eq_zero_iff_forall_notMem,
+        isEmpty_iff_sizeTM_eq_zero] using ⟨_, c.mem_minHeap i hi⟩
     · rw [getElem_minIdx c h, WithTop.coe_le_iff]
       intro x hx
       refine (WithIdx.le_def.mp <| MinHeap.head_le c.minHeap _ (c.mem_minHeap i ?_)).trans ?_ <;>
         simp [hx]
-  -- 我们不能定义一个无需操作堆的 `decreaseKey`，除非假设 `LinearOrder`。
-  -- 考虑有无法通过比较区分的 `x` 和 `x'`， `fun | 0 ↦ x + 1 | 1 ↦ x'`
-  -- 堆中按顺序为 `(x', 1)` `(x, 0)` `(x + 1, 0)`
-  -- 将 `0` 处更新为 `x'`，堆可以变为 `(x, 0)` `(x', 0)` `(x', 1)` `(x + 1, 0)`
-  -- 此时必须操作堆弹出 `(x, 0)`
-  -- decreaseKey c i x hx := ⟨DefaultDict.set c.defaultDict i x,
-  --   insert ⟨x.untop (hx.trans_le le_top).ne, i⟩ c.minHeap,
-  --   by
-  --     haveI : DecidableEq ι := by classical infer_instance
-  --     intro j hj
-  --     simp? [Function.update_apply] at hj ⊢ says
-  --       simp only [AssocDArray.getElem_set, Function.update_apply, AssocDArray.get_eq_getElem,
-  --         defaultDict_getElem, ne_eq] at hj ⊢
-  --     rw [ToMultiset.mem_iff, toMultiset_insert, Multiset.mem_cons]
-  --     split_ifs at hj ⊢ with hji
-  --     · simp [hji]
-  --     · exact .inr <| c.mem_minHeap j hj,
 
 end DefaultDictWithHeap

@@ -8,20 +8,20 @@ import Algorithm.Data.Classes.Dict
 namespace Std.HashMap
 variable {ι α : Type*} [BEq ι] [Hashable ι]
 
-instance : Size (HashMap ι α) where
-  size := size
-  isEmpty := isEmpty
-  isEmpty_iff_size_eq_zero := beq_iff_eq
-
 instance : LawfulEmptyCollection (HashMap ι α) ι where
   not_mem_empty _ := not_mem_empty
 
 variable [LawfulBEq ι]
 
 instance : ToFinset (HashMap ι α) ι where
+  isEmpty := isEmpty
+  isEmpty_iff_forall_not_mem := isEmpty_iff_forall_not_mem
   toFinset c := ⟨c.keys, by simpa [List.Nodup] using c.distinct_keys⟩
   mem_toFinset := by simp
-  size_eq_card_toFinset := by simp [Size.size]
+
+instance : Size (HashMap ι α) where
+  size := size
+  size_eq_sizeTM := by simp [sizeTM_eq_card_toFinset, toFinset]
 
 instance : Dict (HashMap ι α) ι α where
   setElem := insert

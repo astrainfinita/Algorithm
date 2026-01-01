@@ -26,7 +26,7 @@ namespace DFinsupp'
 section ProdAndSum
 
 /-- `DFinsupp'.prod f g` is the product of `g i (f i)` over the support of `f`. -/
-@[to_additive "`DFinsupp'.sum f g` is the sum of `g i (f i)` over the support of `f`."]
+@[to_additive /-- `DFinsupp'.sum f g` is the sum of `g i (f i)` over the support of `f`. -/]
 def prod [∀ (i) (x : β i), Decidable (x ≠ d i)] [CommMonoid γ] (f : Π₀' i, [β i, d i])
     (g : ∀ i, β i → γ) : γ :=
   ∏ i ∈ f.support, g i (f i)

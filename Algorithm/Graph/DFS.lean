@@ -310,7 +310,7 @@ lemma dfsTR_spec' (g : G)
         mem_succList_iff, DFinsupp'.coe_update]
     rw [DFinsupp'.support_update_ne _ _ (by simp), Finset.coe_insert, traversal_insert]
     · simp [hv]
-    · ext; simp (config := { contextual := true }) [hv]
+    · ext; simp (config := { contextual := true })
     · unfold Function.update
       aesop
 

@@ -178,14 +178,16 @@ lemma coe_toListUnordered_singleton (a : α) :
   rfl
 
 instance : ToMultiset (PairingHeap α le) α where
-  size x := x.size
   isEmpty x := x.isEmpty
-  isEmpty_iff_size_eq_zero {x} :=
+  isEmpty_iff_forall_not_mem {x} :=
     match x with
     | ⟨.nil, _⟩ | ⟨.node _ _ _, _⟩ => by
-      simp [isEmpty, size, PairingHeapImp.Heap.isEmpty, PairingHeapImp.Heap.size]
+      simp [isEmpty, PairingHeapImp.Heap.isEmpty, toListUnordered, - not_or]
   toMultiset x := x.toListUnordered
-  size_eq_card_toMultiset := by simp [size, toListUnordered]
+
+instance : Size (PairingHeap α le) where
+  size x := x.size
+  size_eq_sizeTM := by simp [size, toListUnordered, sizeTM, toMultiset]
 
 instance : EmptyCollection (PairingHeap α le) where
   emptyCollection := empty
@@ -218,7 +220,8 @@ instance [Preorder α] [IsTotal α (· ≤ ·)] [DecidableRel (α := α) (· ≤
   head? x := x.head?.rec ⊤ WithTop.some
   tail := tail
   deleteMin := deleteMin
-  head?_eq_top x := by simpa [isEmpty_iff_size_eq_zero, Size.size] using by rintro rfl; rfl
+  head?_eq_top x := by
+    simpa only [isEmpty_iff_size_eq_zero, Size.size, size_eq_zero_iff] using by rintro rfl; rfl
   head?_mem_toMultiset_map x hx := by
     simp only [isEmpty_iff_size_eq_zero] at hx
     match x, hx with
@@ -244,15 +247,15 @@ instance [Preorder α] [IsTotal α (· ≤ ·)] [DecidableRel (α := α) (· ≤
     match x with
     | ⟨.nil, _⟩ => rfl
     | ⟨.node a c .nil, _⟩ =>
-      simp? [Size.isEmpty, isEmpty, PairingHeapImp.Heap.isEmpty, tail, PairingHeapImp.Heap.tail,
-          toMultiset, toListUnordered, PairingHeapImp.Heap.tail?, PairingHeapImp.Heap.deleteMin,
-          - Multiset.coe_eq_coe, - Multiset.coe_erase] says
+      simp? [Membership.IsEmpty.isEmpty, isEmpty, PairingHeapImp.Heap.isEmpty, tail,
+          PairingHeapImp.Heap.tail, toMultiset, toListUnordered, PairingHeapImp.Heap.tail?,
+          PairingHeapImp.Heap.deleteMin, - Multiset.coe_eq_coe, - Multiset.coe_erase] says
         simp only [toMultiset, toListUnordered, tail, PairingHeapImp.Heap.tail,
           PairingHeapImp.Heap.tail?, PairingHeapImp.Heap.deleteMin, Option.map_some,
-          Option.getD_some, PairingHeapImp.Heap.coe_toListUnordered_combine, Size.isEmpty, isEmpty,
-          PairingHeapImp.Heap.isEmpty, Bool.false_eq_true, ↓reduceDIte,
-          PairingHeapImp.Heap.toListUnordered_node, PairingHeapImp.Heap.toListUnordered_nil,
-          List.append_nil]
+          Option.getD_some, PairingHeapImp.Heap.coe_toListUnordered_combine,
+          Membership.IsEmpty.isEmpty, isEmpty, PairingHeapImp.Heap.isEmpty, Bool.false_eq_true,
+          ↓reduceDIte, PairingHeapImp.Heap.toListUnordered_node,
+          PairingHeapImp.Heap.toListUnordered_nil, List.append_nil]
       change _ = Multiset.erase _ a
       simp
   deleteMin_def x := by match x with | ⟨.nil, _⟩ | ⟨.node _ _ _, _⟩ => rfl

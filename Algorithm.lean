@@ -7,7 +7,6 @@ import Algorithm.Data.Classes.GetElem
 import Algorithm.Data.Classes.IndexedMinHeap
 import Algorithm.Data.Classes.MinHeap
 import Algorithm.Data.Classes.MultiBag
-import Algorithm.Data.Classes.Size
 import Algorithm.Data.Classes.ToFinset
 import Algorithm.Data.Classes.ToList
 import Algorithm.Data.Classes.ToMultiset

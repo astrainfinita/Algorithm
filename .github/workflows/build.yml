@@ -3,25 +3,27 @@ on:
 
 name: continuous integration
 
-jobs:
-  # Cancels previous runs of jobs in this file
-  cancel:
-    name: 'Cancel Previous Runs (CI)'
-    runs-on: ubuntu-latest
-    # timeout-minutes: 3
-    steps:
-      - uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
+concurrency:
+  # label each workflow run; only the latest with each label will run
+  # workflows on master get more expressive labels
+  group: ${{ github.workflow }}-${{ github.ref }}.
+    ${{ ( contains(fromJSON( '["refs/heads/master", "refs/heads/staging"]'), github.ref ) && github.run_id) || ''}}
+  # cancel any running workflow with the same label
+  cancel-in-progress: true
 
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - name: cleanup
+        shell: bash    # This *just* deletes old files, so is safe to run outside landrun.
         run: |
-          find . -name . -o -prune -exec rm -rf -- {} +
+          if ! find . -mindepth 1 -exec rm -rf -- {} +; then
+            echo "ERROR: Initial cleanup failed, waiting 5 seconds and retrying..."
+            sleep 5
+            find . -mindepth 1 -exec rm -rf -- {} +
+          fi
           # Delete all but the 5 most recent toolchains.
           # Make sure to delete both the `~/.elan/toolchains/X` directory and the `~/.elan/update-hashes/X` file.
           # Skip symbolic links (`-type d`), the current directory (`! -name .`), and `nightly` and `stable`.
@@ -33,13 +35,17 @@ jobs:
 
       # The Hoskinson runners may not have jq installed, so do that now.
       - name: 'Setup jq'
-        uses: dcarbone/install-jq-action@v1.0.1
+        uses: dcarbone/install-jq-action@f0e10f46ff84f4d32178b4b76e1ef180b16f82c3 # v3.1.1
 
+      # NOTE: if you copy this, consider using `leanprover/lean-action` instead.
+      # We install manually, to avoid running lean outside landrun.
       - name: install elan
+        shell: bash
         run: |
           set -o pipefail
-          curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          ./elan-init -y --default-toolchain none
+          curl -o elan-init.sh -sSfL https://elan.lean-lang.org/elan-init.sh
+          chmod +x elan-init.sh
+          ./elan-init.sh -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "${GITHUB_PATH}"
 
       - uses: actions/checkout@v4
@@ -78,15 +84,12 @@ jobs:
 
       - name: update {Mutable, Algorithm}.lean
         id: mk_all
+        continue-on-error: true # Allow workflow to continue, outcome checked later
+        # This runs `mk_all --check` from the `pr-branch` inside landrun
         run: |
-
-          if ! lake exe mk_all --check
-          then
-            echo "Not all lean files are in the import all files"
-            echo "mk_all=false" >> "${GITHUB_OUTPUT}"
-          else
-            echo "mk_all=true" >> "${GITHUB_OUTPUT}"
-          fi
+          cd pr-branch
+          echo "Running mk_all --check (from pr-branch)..."
+          lake exe mk_all --check
 
       - name: build algorithm
         id: build
@@ -114,7 +117,7 @@ jobs:
             ##  we filter out the output lines that begin with `✔ [xx/yy]`, where xx, yy
             ##  are either numbers or ?, and the "Build completed successfully." message.
             ##  We keep the rest, which are actual outputs of the files
-            awk '!($0 ~ "^\\s*✔ \\[[?0-9]*/[?0-9]*\\]" || $0 == "Build completed successfully."){ print $0 }')"
+            awk '!($0 ~ "^\\s*✔ \\[[?0-9]*/[?0-9]*\\]" || $0 ~ "^Build completed successfully( \\([0-9]+ jobs\\))?\\.?$"){ print $0 }')"
           if [ -n "${buildMsgs}" ]
           then
             printf $'%s\n' "${buildMsgs}"

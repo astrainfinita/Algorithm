@@ -9,20 +9,20 @@ variable {α : Type*} [BEq α] [Hashable α]
 
 namespace Std.HashSet
 
-instance : Size (HashSet α) where
-  size := size
-  isEmpty := isEmpty
-  isEmpty_iff_size_eq_zero := beq_iff_eq
-
 instance : LawfulEmptyCollection (HashSet α) α where
   not_mem_empty _ := not_mem_empty
 
 variable [LawfulBEq α]
 
 instance : ToFinset (HashSet α) α where
+  isEmpty := isEmpty
+  isEmpty_iff_forall_not_mem := isEmpty_iff_forall_not_mem
   toFinset c := ⟨c.toList, by simpa [List.Nodup] using c.inner.distinct_keys⟩
   mem_toFinset := by simp [toList]; rfl
-  size_eq_card_toFinset := by simp [Size.size, toList, size]
+
+instance : Size (HashSet α) where
+  size := size
+  size_eq_sizeTM _ := length_toList.symm
 
 instance : Erase (HashSet α) α where
   erase := erase

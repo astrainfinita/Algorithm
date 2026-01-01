@@ -172,6 +172,7 @@ lemma find_snd_root (self : UnionFind ι P S) (i : ι) :
     (self.find i).snd.root = self.root :=
   rootCore_findAux_snd self.parent self.wf i _
 
+omit [DecidableEq ι] in
 lemma wellFounded_defaultDictSet (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i r : ι) (hr : parent[r] = r) :
     WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[i ↦ r][k] := by
@@ -179,6 +180,7 @@ lemma wellFounded_defaultDictSet (parent : P) (wf : WellFounded fun j k : ι ↦
   induction x using wf.induction with
   | h x ih =>
     refine ⟨x, fun p ⟨hpx, h⟩ ↦ ?_⟩
+    classical
     simp only [all_valid, getElem_setElem] at h
     split_ifs at h with hx
     · subst hx h
@@ -198,7 +200,7 @@ lemma setParent_parent_eq_parent (parent : P) (size : S)
     (wf : WellFounded fun i j : ι ↦ i ≠ j ∧ i = parent[j])
     (i j : ι) (hi : parent[i] = i) (hj : parent[j] = j) (s : ℕ) (k : ι) :
     (setParent parent size wf i j hi hj s).parent[k] = parent[k] ↔ i = k → j = parent[k] := by
-  simp [setParent, Function.update]
+  simp [setParent]
 
 @[simp]
 lemma setParent_parent_eq_self (parent : P) (size : S)
@@ -217,16 +219,15 @@ lemma setParent_root (parent : P) (size : S) (wf : WellFounded fun i j : ι ↦ 
   obtain (hk | hk) := decEq parent[k] k <;> simp only [rootCore_parent, hk, ↓reduceIte]
   · have hik : i ≠ k := by aesop
     have : (setParent parent size wf i j hi hj s).parent[k] ≠ k := by
-      simp [ite_eq_iff, hik, hk]
+      simp [hik, hk]
     simp only [this, ↓reduceIte]
     convert setParent_root parent size wf i j hi hj s parent[k] using 1
     · simp [← (setParent_parent_eq_parent parent size wf i j hi hj s k).mpr (absurd · hik)]
     · simp
-  · simp only [setParent_parent_eq_self, setParent]
+  · simp only [setParent]
     unfold rootCore
     dsimp
     split_ifs <;> aesop
-
 termination_by wf.wrap k
 decreasing_by simp_wf; tauto
 
@@ -468,9 +469,9 @@ lemma find_isRoot (self : UnionFind ι P S) (i : ι) : self.IsRoot (self.find i)
 @[inline]
 def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
   MutableQuotient.map self (fun x ↦ x.union i j) fun _ _ h ↦ by
-    simp only [UnionFindImpl.UnionFindWF.union_root, h]
+    simp only [UnionFindImpl.UnionFindWF.union_root]
     congr! 1
-    simp [h] -- `simp only [h]` made no progress
+    generalize_proofs h₁ h₂ h₃ h₄; revert h₁ h₂ h₃ h₄; rw [h]; intros
     rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
     rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
 
@@ -480,7 +481,7 @@ def size (self : UnionFind ι P S) (i : ι) (hi : self.IsRoot i) : ℕ :=
     (fun x hx ↦ x.size i (by
       induction self using MutableQuotient.ind
       rw [UnionFindImpl.UnionFindWF.isRoot_iff_root, hx, ← hi]
-      simp [find, getModify]))
+      simp [find]))
     (fun _ hx₁ _ hx₂ ↦ by
       dsimp
       rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq]

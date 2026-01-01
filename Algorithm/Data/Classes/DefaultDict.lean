@@ -135,7 +135,7 @@ variable {C}
 lemma getElem_listIndicator [DecidableEq ι] (l : List ι) (f : ∀ i ∈ l, α) (i) :
     (listIndicator C l f)[i] = if hi : i ∈ l then f i hi else d :=
   match l with
-  | [] => by simp [listIndicator, getElem_default, Function.const]
+  | [] => by simp [listIndicator, getElem_default]
   | _ :: l => by
     rw [listIndicator, getElem_setElem_eq_update, Function.update_apply]
     split_ifs with h₁ h₂ h₂

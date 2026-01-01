@@ -23,7 +23,7 @@ lemma head?_isSome' : (head? l).isSome = !l.isEmpty :=
 lemma tail?_isSome' : (tail? l).isSome = !l.isEmpty :=
   match l with | [] | _ :: _ => rfl
 
-lemma isEmpty_eq_decide_eq_nil [DecidableEq α] : l.isEmpty = decide (l = []) := by
+lemma isEmpty_eq_decide_eq_nil : l.isEmpty = decide (l = []) := by
   cases l <;> simp [isEmpty]
 
 lemma isEmpty_eq_decide_length : l.isEmpty = decide (l.length = 0) := by
@@ -51,14 +51,13 @@ lemma dropLast_toList : a.toList.dropLast = a.pop.toList := by
 
 end Array
 
-class ToList (C : Type*) (α : outParam Type*) extends Membership α C, Size C where
+class ToList (C : Type*) (α : outParam Type*) extends Membership α C, Membership.IsEmpty C where
   toList : C → List α
   toArray : C → Array α
   toArray_eq_mk_toList a : toArray a = Array.mk (toList a)
   mem c a := a ∈ toList c
   mem_toList {x c} : x ∈ toList c ↔ x ∈ c := by rfl
-  size_eq_length_toList c : size c = (toList c).length
-export ToList (toList toArray toArray_eq_mk_toList mem_toList size_eq_length_toList)
+export ToList (toList toArray toArray_eq_mk_toList mem_toList)
 
 attribute [simp] toArray_eq_mk_toList mem_toList
 
@@ -68,21 +67,18 @@ instance : ToList (List α) α where
   toList := id
   toArray := Array.mk
   toArray_eq_mk_toList _ := rfl
-  size_eq_length_toList _ := rfl
 
 instance : ToList (Array α) α where
   toList := Array.toList
   toArray := id
   toArray_eq_mk_toList _ := rfl
   mem_toList := Array.mem_def.symm
-  size_eq_length_toList _ := rfl
 
 variable [ToList C α]
 
 instance (priority := 100) ToList.toToMultiset : ToMultiset C α where
   toMultiset c := ↑(toList c)
   mem_toMultiset := mem_toList
-  size_eq_card_toMultiset c := size_eq_length_toList c
 
 section LawfulEmptyCollection
 variable [EmptyCollection C]
@@ -102,21 +98,19 @@ end LawfulEmptyCollection
 
 variable (c : C)
 
-lemma size_eq_size_toArray : size c = (toArray c).size := by
-  simp [size_eq_length_toList]
+lemma length_toList : (toList c).length = sizeTM c := rfl
 
-@[simp]
-lemma length_toList : (toList c).length = size c :=
-  (size_eq_length_toList c).symm
+lemma size_toArray : (toArray c).size = sizeTM c := by simp [length_toList]
 
-lemma size_toArray : (toArray c).size = size c :=
-  (size_eq_size_toArray c).symm
+lemma sizeTM_eq_length_toList : sizeTM c = (toList c).length := rfl
+
+lemma sizeTM_eq_size_toArray : sizeTM c = (toArray c).size := by simp [length_toList]
 
 @[simp]
 lemma coe_toList : ↑(toList c) = toMultiset c := rfl
 
 lemma isEmpty_toList : (toList c).isEmpty = isEmpty c := by
-  rw [isEmpty_eq_decide_size, List.isEmpty_eq_decide_length, size_eq_length_toList]
+  rw [isEmpty_eq_decide_sizeTM, List.isEmpty_eq_decide_length, sizeTM_eq_length_toList]
 
 end ToList
 
@@ -202,9 +196,9 @@ attribute [simp] toList_append
 
 class ToList.RandomAccess (C : Type*) (α : outParam Type*) (Valid : C → ℕ → Prop)
     [ToList C α] [GetElem C ℕ α Valid] where
-  valid_iff_lt_size {c : C} {i : ℕ} : Valid c i ↔ i < size c
+  valid_iff_lt_size {c : C} {i : ℕ} : Valid c i ↔ i < sizeTM c
   getElem_eq_getElem_toArray c i (h : Valid c i := by get_elem_tactic) : c[i]'h = (toArray c)[i]'
-    (((valid_iff_lt_size.mp h).trans_eq (size_eq_size_toArray c)))
+    (((valid_iff_lt_size.mp h).trans_eq (sizeTM_eq_size_toArray c)))
 export ToList.RandomAccess (valid_iff_lt_size getElem_eq_getElem_toArray)
 
 attribute [getElem_simps] valid_iff_lt_size
@@ -219,7 +213,7 @@ instance (priority := 100) LawfulAppend.toMergeable [Append C] [LawfulAppend C �
 
 lemma ToList.RandomAccess.getElem_toArray [GetElem C ℕ α Valid] [ToList.RandomAccess C α Valid]
     (c : C) (i : ℕ) (hi : i < (toArray c).size) :
-    (toArray c)[i] = c[i] :=
+    (toArray c)[i]'hi = c[i]'(by simpa [getElem_simps, hi] using hi) :=
   (getElem_eq_getElem_toArray c _ _).symm
 
 end ToList
@@ -232,7 +226,7 @@ instance : Front (List α) α where
   frontD := List.headD
   front l h := l.head <| List.not_isEmpty_iff.mp h
   frontD_def := List.headD_eq_head?
-  front_mem _ _ := List.head?_eq_head _
+  front_mem _ _ := List.head?_eq_some_head _
 
 instance : PopFront (List α) α where
   popFront := List.tail
@@ -258,7 +252,7 @@ instance : Front (Array α) α where
   front c h := c[0]'(by simp_rw [isEmpty_iff_size_eq_zero, size] at h; omega)
   frontD_def := by simp
   front_mem _ := by
-    simp [size, ← ne_eq, ← Array.toList_eq_nil_iff, ← List.length_pos_iff_ne_nil]
+    simp [← ne_eq]
 
 instance : Back (Array α) α where
   back? := Array.back?

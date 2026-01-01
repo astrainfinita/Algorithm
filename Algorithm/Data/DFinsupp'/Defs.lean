@@ -315,7 +315,7 @@ theorem equivFunOnFintype_single [Fintype ι] (i : ι) (m : β i) :
     DFinsupp'.equivFunOnFintype (DFinsupp'.single d i m) = Function.update d i m := by
   ext x
   dsimp [Function.update]
-  simp [DFinsupp'.single_eq_functionUpdate, @eq_comm _ i]
+  simp [@eq_comm _ i]
 
 @[simp]
 theorem equivFunOnFintype_symm_single [Fintype ι] (i : ι) (m : β i) :
@@ -446,9 +446,9 @@ protected theorem induction_on {p : (Π₀' i, [β i, d i]) → Prop} (x : Π₀
       p (zipWith f (fun _ ↦ hf₁ _ _) (single d i b) x)) :
     p x := by
   cases x with | _ x s
-  induction' s using Trunc.induction_on with s
+  induction s using Trunc.induction_on with | h s
   cases s with | _ s H
-  induction' s using Multiset.induction_on with i s ih generalizing x
+  induction s using Multiset.induction_on generalizing x with | empty | cons i s ih
   · have : x = d := funext fun i => (H i).resolve_left (Multiset.notMem_zero _)
     subst this
     exact h0
@@ -516,7 +516,7 @@ theorem support_mk'_subset {f : ∀ i, β i} {s : Multiset ι} {h} :
 @[simp]
 theorem mem_support_toFun (f : Π₀' i, [β i, d i]) (i) : i ∈ f.support ↔ f i ≠ d i := by
   cases f with | _ f s
-  induction' s using Trunc.induction_on with s
+  induction s using Trunc.induction_on with | h s
   dsimp only [support, Trunc.lift_mk]
   rw [Finset.mem_filter, Multiset.mem_toFinset, coe_mk']
   exact and_iff_right_of_imp (s.prop i).resolve_right
@@ -542,7 +542,8 @@ instance decidableDefault : DecidablePred (Eq (default : Π₀' i, [β i, d i]))
 
 theorem support_subset_iff {s : Set ι} {f : Π₀' i, [β i, d i]} :
     ↑f.support ⊆ s ↔ ∀ i ∉ s, f i = d i := by
-  simp [Set.subset_def]; exact forall_congr' fun i => not_imp_comm
+  simp? [Set.subset_def] says simp only [Set.subset_def, SetLike.mem_coe, mem_support_toFun, ne_eq]
+  exact forall_congr' fun i => not_imp_comm
 
 theorem support_single_ne {i : ι} {b : β i} (hb : b ≠ d i) :
     (single d i b).support = {i} := by
@@ -603,7 +604,7 @@ theorem support_erase (i : ι) (f : Π₀' i, [β i, d i]) :
     (f.erase i).support = f.support.erase i := by
   ext j
   by_cases h1 : j = i
-  · simp only [h1, mem_support_toFun, erase_apply, ite_true, ne_eq, not_true, not_not,
+  · simp only [h1, mem_support_toFun, erase_apply, ite_true, ne_eq, not_true,
     Finset.mem_erase, false_and]
   · by_cases h2 : f j ≠ d j <;> simp at h2 <;> simp [h1, h2]
 

@@ -8,12 +8,11 @@ import Mathlib.Data.Finset.Card
 
 variable {C α : Type*}
 
-class ToFinset (C : Type*) (α : outParam Type*) extends Membership α C, Size C where
+class ToFinset (C : Type*) (α : outParam Type*) extends Membership α C, Membership.IsEmpty C where
   toFinset : C → Finset α
   mem c a := a ∈ toFinset c
   mem_toFinset {x c} : x ∈ toFinset c ↔ x ∈ c := by rfl
-  size_eq_card_toFinset c : size c = (toFinset c).card
-export ToFinset (toFinset mem_toFinset size_eq_card_toFinset)
+export ToFinset (toFinset mem_toFinset)
 
 attribute [simp] mem_toFinset
 
@@ -31,7 +30,10 @@ variable [ToFinset C α] (c : C)
 instance (priority := 100) ToFinset.toToMultiset : ToMultiset C α where
   toMultiset c := (toFinset c).val
   mem_toMultiset := mem_toFinset
-  size_eq_card_toMultiset c := size_eq_card_toFinset c
+
+lemma card_toFinset : (toFinset c).card = sizeTM c := rfl
+
+lemma sizeTM_eq_card_toFinset : sizeTM c = (toFinset c).card := rfl
 
 @[simp]
 lemma toFinset_val : (toFinset c).val = toMultiset c := rfl

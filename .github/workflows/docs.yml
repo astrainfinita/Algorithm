@@ -6,6 +6,7 @@ on:
       - master
   pull_request:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -16,54 +17,23 @@ jobs:
     name: build docs
     runs-on: ubuntu-latest
     steps:
-      - name: clean up
-        run: |
-          rm -rf $HOME/.elan
-          rm -rf $HOME/.cache/mathlib
-
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - id: lean-action
+        uses: leanprover/lean-action@v1
         with:
-          fetch-depth: 2
-          lfs: true
-
-      - name: install elan
+          use-github-cache: false
+      - name: Build Doc
         run: |
-          set -o pipefail
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
-      - name: set default toolchain
-        run: |
-          elan default $(cat lean-toolchain)
-
-      - name: get cache
-        run: lake exe cache get
-
-      - name: build algorithm
-        run: env LEAN_ABORT_ON_PANIC=1 lake build
-
-      - name: build doc-gen4
-        run: |
-          lake build doc-gen4
-
-      - name: build import graph
-        run: |
-          lake exe graph algorithm.html
-
-      - name: generate docs
-        run: |
+          lake exe graph ./docbuild/algorithm.html
+          cd docbuild
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4
           lake build Algorithm:docs
-          lake build Algorithm:docsHeader
-
-      - name: copy import graph
-        run: |
-          cp algorithm.html ./.lake/build/doc
-
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './.lake/build/doc'
+          path: './docbuild/.lake/build/doc'
 
   deploy:
     if: github.ref == 'refs/heads/master'

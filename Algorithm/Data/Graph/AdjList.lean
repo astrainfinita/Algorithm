@@ -179,7 +179,7 @@ instance [DecidableEq V] [DecidableEq Info] {v w : g..Quiver} : Fintype (v ⟶ w
   complete := by
     rintro ⟨e, rfl, rfl⟩
     simp only [coe_toQuiver, Multiset.mem_toFinset, Multiset.mem_pmap, Multiset.mem_filter,
-      mem_toMultiset, id_eq]
+      mem_toMultiset]
     refine ⟨e.info, ⟨e.mem_star, rfl⟩, rfl⟩
 
 end Quiver
@@ -282,7 +282,7 @@ lemma ReachableWithin.inter_compl_singleton_self {s : Set V} {v w : V}
     g..ReachableWithin (s ∩ {v}ᶜ) v w := by
   obtain (⟨-, h⟩ | ⟨x, hx, h⟩) := h.find {v}ᶜ
   · exact h
-  · simp only [sdiff_compl, Set.inf_eq_inter, Set.mem_inter_iff, Set.mem_compl_iff,
+  · simp only [sdiff_compl, Set.inf_eq_inter, Set.mem_inter_iff,
       Set.mem_singleton_iff] at hx
     exact hx.2 ▸ h
 
