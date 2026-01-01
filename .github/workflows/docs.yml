@@ -26,6 +26,7 @@ jobs:
         run: |
           lake exe graph ./docbuild/algorithm.html
           cd docbuild
+          lake exe cache get
           lake build Algorithm:docs
           lake build Algorithm:docsHeader
       - name: Setup Pages
