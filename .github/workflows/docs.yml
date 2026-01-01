@@ -26,7 +26,7 @@ jobs:
         run: |
           lake exe graph ./docbuild/algorithm.html
           cd docbuild
-          lake exe cache get
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4
           lake build Algorithm:docs
           lake build Algorithm:docsHeader
       - name: Setup Pages
