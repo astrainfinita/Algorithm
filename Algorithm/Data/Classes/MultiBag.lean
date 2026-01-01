@@ -29,12 +29,10 @@ attribute [simp] count_eq_count_toMultiset toMultiset_insert
 section MultiBag.ReadOnly
 variable {C α : Type*} [MultiBag.ReadOnly C α] (c : C)
 
-variable [DecidableEq α]
+theorem count_eq_zero {a : α} {c : C} : count a c = 0 ↔ a ∉ c := by
+  classical exact count_eq_count_toMultiset a c ▸ count_toMultiset_eq_zero
 
-theorem count_eq_zero {a : α} {c : C} : count a c = 0 ↔ a ∉ c :=
-  count_eq_count_toMultiset a c ▸ count_toMultiset_eq_zero
-
-theorem count_ne_zero {a : α} {c : C} : count a c ≠ 0 ↔ a ∈ c :=
-  count_eq_count_toMultiset a c ▸ count_toMultiset_ne_zero
+theorem count_ne_zero {a : α} {c : C} : count a c ≠ 0 ↔ a ∈ c := by
+  classical exact count_eq_count_toMultiset a c ▸ count_toMultiset_ne_zero
 
 end MultiBag.ReadOnly

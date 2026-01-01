@@ -542,7 +542,8 @@ instance decidableDefault : DecidablePred (Eq (default : Π₀' i, [β i, d i]))
 
 theorem support_subset_iff {s : Set ι} {f : Π₀' i, [β i, d i]} :
     ↑f.support ⊆ s ↔ ∀ i ∉ s, f i = d i := by
-  simp [Set.subset_def]; exact forall_congr' fun i => not_imp_comm
+  simp? [Set.subset_def] says simp only [Set.subset_def, SetLike.mem_coe, mem_support_toFun, ne_eq]
+  exact forall_congr' fun i => not_imp_comm
 
 theorem support_single_ne {i : ι} {b : β i} (hb : b ≠ d i) :
     (single d i b).support = {i} := by

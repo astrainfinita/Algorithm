@@ -172,6 +172,7 @@ lemma find_snd_root (self : UnionFind ι P S) (i : ι) :
     (self.find i).snd.root = self.root :=
   rootCore_findAux_snd self.parent self.wf i _
 
+omit [DecidableEq ι] in
 lemma wellFounded_assocArraySet (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i r : ι) (hr : parent[r] = r) :
     WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[i ↦ r][k] := by
@@ -179,6 +180,7 @@ lemma wellFounded_assocArraySet (parent : P) (wf : WellFounded fun j k : ι ↦ 
   induction x using wf.induction with
   | h x ih =>
     refine ⟨x, fun p ⟨hpx, h⟩ ↦ ?_⟩
+    classical
     simp only [all_valid, getElem_setElem] at h
     split_ifs at h with hx
     · subst hx h
@@ -226,7 +228,6 @@ lemma setParent_root (parent : P) (size : S) (wf : WellFounded fun i j : ι ↦ 
     unfold rootCore
     dsimp
     split_ifs <;> aesop
-
 termination_by wf.wrap k
 decreasing_by simp_wf; tauto
 
@@ -470,7 +471,7 @@ def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
   MutableQuotient.map self (fun x ↦ x.union i j) fun _ _ h ↦ by
     simp only [UnionFindImpl.UnionFindWF.union_root]
     congr! 1
-    simp [h] -- `simp only [h]` made no progress
+    generalize_proofs h₁ h₂ h₃ h₄; revert h₁ h₂ h₃ h₄; rw [h]; intros
     rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
     rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
 
