@@ -23,7 +23,7 @@ lemma head?_isSome' : (head? l).isSome = !l.isEmpty :=
 lemma tail?_isSome' : (tail? l).isSome = !l.isEmpty :=
   match l with | [] | _ :: _ => rfl
 
-lemma isEmpty_eq_decide_eq_nil [DecidableEq α] : l.isEmpty = decide (l = []) := by
+lemma isEmpty_eq_decide_eq_nil : l.isEmpty = decide (l = []) := by
   cases l <;> simp [isEmpty]
 
 lemma isEmpty_eq_decide_length : l.isEmpty = decide (l.length = 0) := by
