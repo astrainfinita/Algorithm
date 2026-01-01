@@ -31,18 +31,18 @@ instance : LawfulErase C ι := lawfulErase_iff_toFinset.mpr fun c i ↦ by
 
 def Dict.DefaultDict (C : Type*) := C
 
-def Dict.asDefaultDict : C ≃ Dict.DefaultDict C := Equiv.refl _
+def Dict.toDefaultDict : C ≃ Dict.DefaultDict C := Equiv.refl _
 
 instance : Inhabited (Dict.DefaultDict C) where
-  default := Dict.asDefaultDict ∅
+  default := Dict.toDefaultDict ∅
 
-instance [Dict C ι α] : DefaultDict (Dict.DefaultDict C) ι (Option α) none where
-  getElem a i _ := (Dict.asDefaultDict.symm a)[i]?
-  toDFinsupp' a := .mk' ((Dict.asDefaultDict.symm a)[·]?)
-    (.mk ⟨toMultiset (Dict.asDefaultDict.symm a), fun i ↦ by
+instance [Dict C ι α] : DefaultDict (Dict.DefaultDict C) ι (Option α) fun _ ↦ none where
+  getElem a i _ := (Dict.toDefaultDict.symm a)[i]?
+  toDFinsupp' a := .mk' ((Dict.toDefaultDict.symm a)[·]?)
+    (.mk ⟨toMultiset (Dict.toDefaultDict.symm a), fun i ↦ by
       simp [mem_toMultiset, or_iff_not_imp_left] ⟩)
   coe_toDFinsupp'_eq_getElem := by simp
-  setElem c i x := Dict.asDefaultDict <| alterElem (Dict.asDefaultDict.symm c) i (fun _ ↦ x)
+  setElem c i x := Dict.toDefaultDict <| alterElem (Dict.toDefaultDict.symm c) i (fun _ ↦ x)
   getElem_setElem_self := by simp
   getElem_setElem_of_ne _ _ _ _ hij := by simp [hij]
   getElem_default _ := by simpa [default] using getElem?_neg (cont := C) _ _ (not_mem_empty _)

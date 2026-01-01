@@ -14,7 +14,7 @@ variable
   {V : Type*} {Info : Type*}
   {EColl : Type*} [ToList EColl Info] [EmptyCollection EColl]
   [LawfulEmptyCollection EColl Info]
-  {StarColl : Type*} [DefaultDict.ReadOnly StarColl V EColl ∅]
+  {StarColl : Type*} [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅]
   {G : Type*} [AdjListClass G V Info EColl StarColl] {g : G}
 
 variable (g) in

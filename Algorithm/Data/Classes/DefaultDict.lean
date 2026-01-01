@@ -7,14 +7,12 @@ import Algorithm.Data.Classes.GetElem
 import Algorithm.Data.DFinsupp'.Defs
 import Mathlib.Data.Setoid.Basic
 
-universe u v
-
 namespace Vector
 variable {α : Type*} {n : ℕ}
 
 set_option linter.unusedVariables false in -- TODO: generalize
 @[nolint unusedArguments]
-protected abbrev WithDefault (α : Type u) (n : Nat) (f : Fin n → α) := Vector α n
+protected abbrev WithDefault (α : Type*) (n : Nat) (f : Fin n → α) := Vector α n
 
 instance {α n f} : Inhabited (Vector.WithDefault α n f) where
   default := .ofFn f
@@ -26,41 +24,31 @@ lemma get_default {f} : (default : Vector.WithDefault α n f).get = f := by
 
 end Vector
 
-class AssocDArray.ReadOnly (C : Type*) (ι : outParam Type*)
+class DefaultDict.ReadOnly (C : Type*) (ι : outParam Type*)
     (α : outParam Type*) (d : outParam <| ι → α) extends
     GetElemAllValid C ι α where
   toDFinsupp' : C → Π₀' i, [α, d i]
   coe_toDFinsupp'_eq_getElem : ∀ a, ⇑(toDFinsupp' a) = (a[·])
-export AssocDArray.ReadOnly (toDFinsupp' coe_toDFinsupp'_eq_getElem)
-
-/-- `AssocDArray C ι α d` is a data structure that acts like a finitely supported function
-  `Π₀' i, [α, d i]` with single point update operation. -/
-class AssocDArray (C : Type*) [Inhabited C] (ι : outParam Type*)
-    (α : outParam Type*) (d : outParam <| ι → α) extends
-    AssocDArray.ReadOnly C ι α d, GetSetElemAllValid C ι α where
-  getElem_default i : (default : C)[i] = d i
-
-abbrev DefaultDict.ReadOnly (C : Type*) (ι : outParam Type*)
-    (α : outParam Type*) (d : outParam α) :=
-  AssocDArray.ReadOnly C ι α (fun _ ↦ d)
+export DefaultDict.ReadOnly (toDFinsupp' coe_toDFinsupp'_eq_getElem)
 
 /-- `DefaultDict C ι α d` is a data structure that acts like a finitely supported function
-  `ι →₀' [α, d]` with single point update operation. -/
-abbrev DefaultDict (C : Type*) [Inhabited C] (ι : outParam Type*)
-    (α : outParam Type*) (d : outParam α) :=
-  AssocDArray C ι α (fun _ ↦ d)
+  `Π₀' i, [α, d i]` with single point update operation. -/
+class DefaultDict (C : Type*) [Inhabited C] (ι : outParam Type*)
+    (α : outParam Type*) (d : outParam <| ι → α) extends
+    DefaultDict.ReadOnly C ι α d, GetSetElemAllValid C ι α where
+  getElem_default i : (default : C)[i] = d i
 
-attribute [simp] AssocDArray.getElem_default coe_toDFinsupp'_eq_getElem
+attribute [simp] DefaultDict.getElem_default coe_toDFinsupp'_eq_getElem
 
 section AssocDArray
 
 variable {C ι α : Type*} {d : ι → α}
 
-variable [Inhabited C] [AssocDArray C ι α d]
+variable [Inhabited C] [DefaultDict C ι α d]
 
 instance : OfFn C ι α d where
   ofFn := default
-  getElem_ofFn i := AssocDArray.getElem_default i
+  getElem_ofFn i := DefaultDict.getElem_default i
 
 lemma toDFinsupp'_apply_eq_getElem (a : C) (i : ι) : toDFinsupp' a i = a[i] := by simp
 
@@ -79,7 +67,7 @@ end AssocDArray
 namespace Vector.WithDefault
 variable {α : Type*} {n : ℕ} {f : Fin n → α}
 
-instance : AssocDArray (Vector.WithDefault α n f) (Fin n) α f where
+instance : DefaultDict (Vector.WithDefault α n f) (Fin n) α f where
   getElem a i _ := a.get i
   setElem a i := a.set i
   getElem_setElem_self a i v := a.getElem_set_self i.2
@@ -92,13 +80,11 @@ end Vector.WithDefault
 
 namespace DefaultDict
 
-export AssocDArray (getElem_default)
-
 class Ext (C : Type*) [Inhabited C] (ι : outParam Type*) (α : outParam Type*)
-    (d : outParam α) [DefaultDict C ι α d] : Prop where
+    (d : outParam α) [DefaultDict C ι α fun _ ↦ d] : Prop where
   ext : ∀ {m₁ m₂ : C}, (∀ i : ι, m₁[i] = m₂[i]) → m₁ = m₂
 
-variable {C : Type*} [Inhabited C] {ι : Type*} {α : Type*} {d : α} [DefaultDict C ι α d]
+variable {C : Type*} [Inhabited C] {ι : Type*} {α : Type*} {d : α} [DefaultDict C ι α fun _ ↦ d]
 
 variable (C)
 
@@ -107,7 +93,7 @@ protected def Quotient := @Quotient C (Setoid.ker (fun (a : C) (i : ι) ↦ a[i]
 instance : Inhabited (DefaultDict.Quotient C) :=
   inferInstanceAs <| Inhabited (@Quotient C (Setoid.ker _))
 
-instance : DefaultDict (DefaultDict.Quotient C) ι α d where
+instance : DefaultDict (DefaultDict.Quotient C) ι α fun _ ↦ d where
   getElem c i _ := Quotient.lift (·[·] : C → ι → α) (fun _ _ ↦ id) c i
   setElem q i v := q.map' (·[i ↦ v]) fun _ _ hm ↦ funext fun j ↦ by
     classical simp [congrFun hm j]
@@ -173,16 +159,15 @@ abbrev toOfFn [Fintype ι] (f : ι → α) : OfFn C ι α f where
 
 end DefaultDict
 
-class HasDefaultAssocDArray (ι : Type u) (α : Type v) (f : ι → α)
-    (DefaultAssocDArray : outParam <| Type max u v)
-    [Inhabited DefaultAssocDArray] where
-  [toAssocDArray : AssocDArray DefaultAssocDArray ι α f]
+class HasDefaultDict (ι : Type*) (α : Type*) (f : ι → α) (C : outParam <| Type*)
+    [Inhabited C] where
+  [toDefaultDict : DefaultDict C ι α f]
 
 @[nolint unusedArguments]
-def DefaultAssocDArray (ι : Type u) (α : Type v) (f : ι → α) {D : Type _} [Inhabited D]
-    [HasDefaultAssocDArray ι α f D] :=
-  D
+def mkDefaultDict (ι : Type*) (α : Type*) (f : ι → α) {D : Type*} [Inhabited D]
+    [HasDefaultDict ι α f D] : D :=
+  default
 
-instance {n α f} : HasDefaultAssocDArray (Fin n) α f (Vector.WithDefault α n f) where
+instance {n α f} : HasDefaultDict (Fin n) α f (Vector.WithDefault α n f) where
 
-example {n α f} := DefaultAssocDArray (Fin n) α f
+example {n α f} := mkDefaultDict (Fin n) α f
