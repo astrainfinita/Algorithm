@@ -28,7 +28,6 @@ jobs:
           cd docbuild
           MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4
           lake build Algorithm:docs
-          lake build Algorithm:docsHeader
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
