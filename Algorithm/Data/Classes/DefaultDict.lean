@@ -14,14 +14,6 @@ set_option linter.unusedVariables false in -- TODO: generalize
 @[nolint unusedArguments]
 protected abbrev WithDefault (α : Type*) (n : Nat) (f : Fin n → α) := Vector α n
 
-instance {α n f} : Inhabited (Vector.WithDefault α n f) where
-  default := .ofFn f
-
-@[simp]
-lemma get_default {f} : (default : Vector.WithDefault α n f).get = f := by
-  ext i
-  exact getElem_ofFn i.2
-
 end Vector
 
 class DefaultDict.ReadOnly (C : Type*) (ι : outParam Type*)
@@ -66,6 +58,14 @@ end AssocDArray
 
 namespace Vector.WithDefault
 variable {α : Type*} {n : ℕ} {f : Fin n → α}
+
+instance {α n f} : Inhabited (Vector.WithDefault α n f) where
+  default := .ofFn f
+
+@[simp]
+lemma get_default {f} : (default : Vector.WithDefault α n f).get = f := by
+  ext i
+  exact getElem_ofFn i.2
 
 instance : DefaultDict (Vector.WithDefault α n f) (Fin n) α f where
   getElem a i _ := a.get i

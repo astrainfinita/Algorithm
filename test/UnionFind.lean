@@ -1,6 +1,5 @@
 import Algorithm.Data.UnionFind
 
-abbrev Vector := Batteries.Vector
 abbrev UF := UnionFind (Fin 10) (Vector (Fin 10) 10) (Vector Nat 10)
 
 /--
