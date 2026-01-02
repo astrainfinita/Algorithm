@@ -3,7 +3,7 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.AssocArray
+import Algorithm.Data.Classes.DefaultDict
 import Algorithm.Data.Classes.ToList
 -- import Mathlib.Data.List.Nodup
 import Mathlib.Combinatorics.Quiver.Path
@@ -12,7 +12,7 @@ structure AdjList
     (V : Type*) (Info : Type*)
     (EColl : Type*) [ToMultiset EColl Info] [EmptyCollection EColl]
     [LawfulEmptyCollection EColl Info]
-    (StarColl : Type*) [AssocArray.ReadOnly StarColl V EColl ∅] where
+    (StarColl : Type*) [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅] where
   protected snd : Info → V
   protected star : StarColl
 
@@ -20,7 +20,7 @@ structure AdjList₂
     (V : Type*) (Info : Type*)
     (EColl : Type*) [ToMultiset EColl Info] [EmptyCollection EColl]
     [LawfulEmptyCollection EColl Info]
-    (StarColl : Type*) [AssocArray.ReadOnly StarColl V EColl ∅] extends
+    (StarColl : Type*) [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅] extends
     AdjList V Info EColl StarColl where
   fst : Info → V
   costar : StarColl
@@ -36,7 +36,7 @@ class AdjListClass (G : Type*)
     (V : outParam <| Type*) (Info : outParam <| Type*)
     (EColl : outParam <| Type*) [ToMultiset EColl Info] [EmptyCollection EColl]
     [LawfulEmptyCollection EColl Info]
-    (StarColl : outParam <| Type*) [AssocArray.ReadOnly StarColl V EColl ∅] where
+    (StarColl : outParam <| Type*) [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅] where
   snd : G → Info → V
   star : G → StarColl
 
@@ -56,7 +56,7 @@ variable
   {V : Type*} {Info : Type*}
   {EColl : Type*} [ToMultiset EColl Info] [EmptyCollection EColl]
   [LawfulEmptyCollection EColl Info]
-  {StarColl : Type*} [AssocArray.ReadOnly StarColl V EColl ∅]
+  {StarColl : Type*} [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅]
 
 instance : AdjListClass (AdjList V Info EColl StarColl) V Info EColl StarColl where
   snd := AdjList.snd
@@ -365,7 +365,7 @@ variable
   {V : Type*} {Info : Type*}
   {EColl : Type*} [ToList EColl Info] [EmptyCollection EColl]
   [LawfulEmptyCollection EColl Info]
-  {StarColl : Type*} [AssocArray.ReadOnly StarColl V EColl ∅]
+  {StarColl : Type*} [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅]
   {G : Type*} [AdjListClass G V Info EColl StarColl] (g : G)
 
 def succList (v : V) : List V := (toList g[v]).map g..snd

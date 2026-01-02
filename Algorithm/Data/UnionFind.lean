@@ -173,7 +173,7 @@ lemma find_snd_root (self : UnionFind ι P S) (i : ι) :
   rootCore_findAux_snd self.parent self.wf i _
 
 omit [DecidableEq ι] in
-lemma wellFounded_assocArraySet (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
+lemma wellFounded_defaultDictSet (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i r : ι) (hr : parent[r] = r) :
     WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[i ↦ r][k] := by
   refine ⟨fun x ↦ ?_⟩
@@ -193,7 +193,7 @@ set_option linter.unusedVariables false in -- easier to `rw` and `simp`
 def setParent (parent : P) (size : S) (wf : WellFounded fun i j : ι ↦ i ≠ j ∧ i = parent[j])
     (i j : ι) (hi : parent[i] = i) (hj : parent[j] = j) (s : ℕ) :
     UnionFind ι P S :=
-  ⟨parent[i ↦ j], size[j ↦ s], wellFounded_assocArraySet parent wf i j hj⟩
+  ⟨parent[i ↦ j], size[j ↦ s], wellFounded_defaultDictSet parent wf i j hj⟩
 
 @[simp]
 lemma setParent_parent_eq_parent (parent : P) (size : S)

@@ -3,7 +3,7 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.AssocArray
+import Algorithm.Data.Classes.DefaultDict
 import Algorithm.Data.Classes.MinHeap
 import Algorithm.Data.Classes.ToList
 import Mathlib.Data.Finset.Lattice.Fold
@@ -11,7 +11,7 @@ import Mathlib.Data.Prod.Lex
 
 class IndexedMinHeap (C : Type*) [Inhabited C] (ι : outParam Type*)
     (α : outParam Type*) [Preorder α] [IsTotal α (· ≤ ·)] [OrderTop α] extends
-    AssocDArray C ι α fun _ ↦ ⊤ where
+    DefaultDict C ι α fun _ ↦ ⊤ where
   minIdx : C → ι
   getElem_minIdx_le c (i : ι) : c[minIdx c] ≤ c[i]
   decreaseKey (c : C) (i : ι) : ∀ v < c[i], C := fun v _ ↦ c[i ↦ v]
@@ -63,7 +63,7 @@ variable {α : Type*} [LinearOrder α] {n : ℕ} [NeZero n] {d : Fin n → α}
 
 section ReadOnly
 
-variable [AssocDArray.ReadOnly (Vector α n) (Fin n) α d]
+variable [DefaultDict.ReadOnly (Vector α n) (Fin n) α d]
 
 abbrev minAux (a : Vector α n) : Lex (α × Fin n) :=
   (⊤ : Finset (Fin n)).inf' ⟨0, Finset.mem_univ 0⟩ (fun i ↦ toLex (a[i], i))
@@ -107,17 +107,17 @@ instance (α) (x : WithTop α) : Decidable (x = ⊤) :=
 
 end WithTop
 
-structure AssocArrayWithHeap.WithIdx (α ι : Type*) where
+structure DefaultDictWithHeap.WithIdx (α ι : Type*) where
   val : α
   idx : ι
 
-namespace AssocArrayWithHeap.WithIdx
+namespace DefaultDictWithHeap.WithIdx
 variable {α ι : Type*}
 
-instance [LE α] : LE (AssocArrayWithHeap.WithIdx α ι) where
+instance [LE α] : LE (DefaultDictWithHeap.WithIdx α ι) where
   le x y := x.val ≤ y.val
 
-lemma le_def [LE α] {x y : AssocArrayWithHeap.WithIdx α ι} :
+lemma le_def [LE α] {x y : DefaultDictWithHeap.WithIdx α ι} :
     x ≤ y ↔ x.val ≤ y.val :=
   Iff.rfl
 
@@ -126,7 +126,7 @@ lemma mk_le_mk [LE α] {x y : α} {xi yi : ι} :
     mk x xi ≤ mk y yi ↔ x ≤ y :=
   Iff.rfl
 
-instance [LT α] : LT (AssocArrayWithHeap.WithIdx α ι) where
+instance [LT α] : LT (DefaultDictWithHeap.WithIdx α ι) where
   lt x y := x.val < y.val
 
 @[simp]
@@ -134,65 +134,65 @@ lemma mk_lt_mk [LT α] {x y : α} {xi yi : ι} :
     mk x xi < mk y yi ↔ x < y :=
   Iff.rfl
 
-instance [Preorder α] : Preorder (AssocArrayWithHeap.WithIdx α ι) where
+instance [Preorder α] : Preorder (DefaultDictWithHeap.WithIdx α ι) where
   le_refl _ := le_refl _
   le_trans _ _ _ := le_trans
   lt_iff_le_not_ge _ _ := lt_iff_le_not_ge
 
 instance [Preorder α] [IsTotal α (· ≤ ·)] :
-    IsTotal (AssocArrayWithHeap.WithIdx α ι) (· ≤ ·) where
+    IsTotal (DefaultDictWithHeap.WithIdx α ι) (· ≤ ·) where
   total _ _ := total_of (α := α) (· ≤ ·) _ _
 
-end AssocArrayWithHeap.WithIdx
+end DefaultDictWithHeap.WithIdx
 
-structure AssocArrayWithHeap (C C' : Type*) {ι α : Type*} [Preorder α] [IsTotal α (· ≤ ·)]
-    [Inhabited C] [AssocArray C ι (WithTop α) ⊤]
-    [MinHeap C' (AssocArrayWithHeap.WithIdx α ι)] where mk' ::
-  assocArray : C
+structure DefaultDictWithHeap (C C' : Type*) {ι α : Type*} [Preorder α] [IsTotal α (· ≤ ·)]
+    [Inhabited C] [DefaultDict C ι (WithTop α) ⊤]
+    [MinHeap C' (DefaultDictWithHeap.WithIdx α ι)] where mk' ::
+  defaultDict : C
   minHeap : C'
-  mem_minHeap' : ∀ i : ι, (hi : assocArray[i] ≠ ⊤) → ⟨assocArray[i].untop hi, i⟩ ∈ minHeap
+  mem_minHeap' : ∀ i : ι, (hi : defaultDict[i] ≠ ⊤) → ⟨defaultDict[i].untop hi, i⟩ ∈ minHeap
   getElem_minIdx' : (h : ¬isEmpty minHeap) →
-    assocArray[(MinHeap.head minHeap h).idx] = (MinHeap.head minHeap h).val
+    defaultDict[(MinHeap.head minHeap h).idx] = (MinHeap.head minHeap h).val
 
-namespace AssocArrayWithHeap
+namespace DefaultDictWithHeap
 variable {C C' : Type*} {ι α : Type*} [Preorder α] [IsTotal α (· ≤ ·)]
-  [Inhabited C] [AssocArray C ι (WithTop α) ⊤]
-  [MinHeap C' (AssocArrayWithHeap.WithIdx α ι)]
+  [Inhabited C] [DefaultDict C ι (WithTop α) ⊤]
+  [MinHeap C' (DefaultDictWithHeap.WithIdx α ι)]
 
-instance : AssocArray.ReadOnly (AssocArrayWithHeap C C') ι (WithTop α) ⊤ where
-  getElem c i _ := c.assocArray[i]
-  toDFinsupp' c := toDFinsupp' c.assocArray
-  coe_toDFinsupp'_eq_getElem c := coe_toDFinsupp'_eq_getElem c.assocArray
+instance : DefaultDict.ReadOnly (DefaultDictWithHeap C C') ι (WithTop α) ⊤ where
+  getElem c i _ := c.defaultDict[i]
+  toDFinsupp' c := toDFinsupp' c.defaultDict
+  coe_toDFinsupp'_eq_getElem c := coe_toDFinsupp'_eq_getElem c.defaultDict
 
 @[simp]
-lemma assocArray_getElem (c : AssocArrayWithHeap C C') (i : ι) :
-    c.assocArray[i] = c[i] :=
+lemma defaultDict_getElem (c : DefaultDictWithHeap C C') (i : ι) :
+    c.defaultDict[i] = c[i] :=
   rfl
 
-lemma mem_minHeap (c : AssocArrayWithHeap C C') :
+lemma mem_minHeap (c : DefaultDictWithHeap C C') :
     ∀ i : ι, (hi : c[i] ≠ ⊤) → ⟨c[i].untop hi, i⟩ ∈ c.minHeap :=
   c.mem_minHeap'
 
-lemma getElem_minIdx (c : AssocArrayWithHeap C C') (h : ¬isEmpty c.minHeap) :
+lemma getElem_minIdx (c : DefaultDictWithHeap C C') (h : ¬isEmpty c.minHeap) :
     c[(MinHeap.head c.minHeap h).idx] = (MinHeap.head c.minHeap h).val :=
   c.getElem_minIdx' h
 
-instance : Inhabited (AssocArrayWithHeap C C') where
+instance : Inhabited (DefaultDictWithHeap C C') where
   default := ⟨default, ∅, by simp, by simp [sizeTM_eq_card_toMultiset, isEmpty_iff_sizeTM_eq_zero]⟩
 
-def mk [DecidableEq α] (assocArray : C) (minHeap : C')
-    (mem_minHeap : ∀ i : ι, (hi : assocArray[i] ≠ ⊤) → ⟨(assocArray[i]).untop hi, i⟩ ∈ minHeap) :
-    AssocArrayWithHeap C C' :=
+def mk [DecidableEq α] (defaultDict : C) (minHeap : C')
+    (mem_minHeap : ∀ i : ι, (hi : defaultDict[i] ≠ ⊤) → ⟨(defaultDict[i]).untop hi, i⟩ ∈ minHeap) :
+    DefaultDictWithHeap C C' :=
   if h : isEmpty minHeap then
-    ⟨assocArray, minHeap, mem_minHeap, (False.elim <| · h)⟩
-  else if h' : assocArray[(MinHeap.head minHeap h).idx] = (MinHeap.head minHeap h).val then
-    ⟨assocArray, minHeap, mem_minHeap, fun _ ↦ h'⟩
+    ⟨defaultDict, minHeap, mem_minHeap, (False.elim <| · h)⟩
+  else if h' : defaultDict[(MinHeap.head minHeap h).idx] = (MinHeap.head minHeap h).val then
+    ⟨defaultDict, minHeap, mem_minHeap, fun _ ↦ h'⟩
   else
     haveI : DecidableEq (WithIdx α ι) := by classical infer_instance
     have : sizeTM (MinHeap.tail minHeap) < sizeTM minHeap := by
       simpa [h, sizeTM_eq_card_toMultiset, Multiset.card_erase_lt_of_mem] using
         Multiset.card_erase_lt_of_mem (MinHeap.head_mem_toMultiset _ _)
-    mk assocArray (MinHeap.tail minHeap) fun i hi ↦ by
+    mk defaultDict (MinHeap.tail minHeap) fun i hi ↦ by
       simp only [← mem_toMultiset, MinHeap.toMultiset_tail, h, Bool.false_eq_true, ↓reduceDIte,
         MinHeap.head_def]
       rw [Multiset.mem_erase_of_ne, mem_toMultiset]
@@ -203,33 +203,33 @@ def mk [DecidableEq α] (assocArray : C) (minHeap : C')
 termination_by sizeTM minHeap
 
 @[simp, nolint unusedHavesSuffices] -- false positive
-lemma mk_assocArray [DecidableEq α] (assocArray : C) (minHeap : C')
-    (mem_minHeap : ∀ i : ι, (hi : assocArray[i] ≠ ⊤) → ⟨(assocArray[i]).untop hi, i⟩ ∈ minHeap) :
-    (mk assocArray minHeap mem_minHeap).assocArray = assocArray := by
+lemma mk_defaultDict [DecidableEq α] (defaultDict : C) (minHeap : C')
+    (mem_minHeap : ∀ i : ι, (hi : defaultDict[i] ≠ ⊤) → ⟨(defaultDict[i]).untop hi, i⟩ ∈ minHeap) :
+    (mk defaultDict minHeap mem_minHeap).defaultDict = defaultDict := by
   induction minHeap, mem_minHeap using mk.induct
   all_goals unfold mk; simp [*]
 
 @[simp]
-lemma default_assocArray :
-    (default : AssocArrayWithHeap C C').assocArray = default :=
+lemma default_defaultDict :
+    (default : DefaultDictWithHeap C C').defaultDict = default :=
   rfl
 
 @[simp]
 lemma default_minHeap :
-    (default : AssocArrayWithHeap C C').minHeap = ∅ :=
+    (default : DefaultDictWithHeap C C').minHeap = ∅ :=
   rfl
 
 instance [DecidableEq α] :
-    AssocArray (AssocArrayWithHeap C C') ι (WithTop α) ⊤ where
+    DefaultDict (DefaultDictWithHeap C C') ι (WithTop α) ⊤ where
   setElem c i x :=
     mk
-      c.assocArray[i ↦ x]
+      c.defaultDict[i ↦ x]
       (if hx : x = ⊤ then c.minHeap else insert ⟨x.untop hx, i⟩ c.minHeap)
       fun j hj ↦ by
         haveI : DecidableEq ι := by classical infer_instance
         split_ifs with hx <;>
           simp? [Function.update_apply] at hj ⊢ says
-            simp only [all_valid, getElem_setElem, assocArray_getElem, ne_eq] at hj ⊢
+            simp only [all_valid, getElem_setElem, defaultDict_getElem, ne_eq] at hj ⊢
         · subst hx
           rw [ite_eq_left_iff, Classical.not_imp] at hj
           simp only [hj.1, ↓reduceIte]
@@ -244,12 +244,12 @@ instance [DecidableEq α] :
   getElem_default := by simp [getElem]
 
 @[simp]
-lemma set_assocArray [DecidableEq α] (c : AssocArrayWithHeap C C') (i : ι) (x) :
-    c[i ↦ x].assocArray = c.assocArray[i ↦ x] := by
+lemma set_defaultDict [DecidableEq α] (c : DefaultDictWithHeap C C') (i : ι) (x) :
+    c[i ↦ x].defaultDict = c.defaultDict[i ↦ x] := by
   unfold_projs; simp
 
 instance [Inhabited ι] [DecidableEq α] :
-    IndexedMinHeap (AssocArrayWithHeap C C') ι (WithTop α) where
+    IndexedMinHeap (DefaultDictWithHeap C C') ι (WithTop α) where
   minIdx c := if h : isEmpty c.minHeap then default else (MinHeap.head c.minHeap h).idx
   getElem_minIdx_le c i := by
     split_ifs with h
@@ -263,4 +263,4 @@ instance [Inhabited ι] [DecidableEq α] :
       refine (WithIdx.le_def.mp <| MinHeap.head_le c.minHeap _ (c.mem_minHeap i ?_)).trans ?_ <;>
         simp [hx]
 
-end AssocArrayWithHeap
+end DefaultDictWithHeap

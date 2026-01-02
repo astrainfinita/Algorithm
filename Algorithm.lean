@@ -1,6 +1,6 @@
 import Algorithm.Algebra.BigOperators.DFinsupp'
-import Algorithm.Data.Classes.AssocArray
 import Algorithm.Data.Classes.Bag
+import Algorithm.Data.Classes.DefaultDict
 import Algorithm.Data.Classes.Dict
 import Algorithm.Data.Classes.Erase
 import Algorithm.Data.Classes.GetElem
