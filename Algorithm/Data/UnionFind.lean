@@ -457,7 +457,7 @@ instance [OfFn P ι ι id] [OfFn S ι ℕ (fun _ ↦ 1)] : Inhabited (UnionFind 
 
 @[inline]
 def find (self : UnionFind ι P S) (i : ι) : ι :=
-  MutableQuotient.getModify self (fun x ↦ x.find i) (by simp (config := { contextual := true }))
+  MutableQuotient.liftModify self (fun x ↦ x.find i) (by simp (config := { contextual := true }))
     (by simp)
 
 def IsRoot (self : UnionFind ι P S) (i : ι) : Prop := self.find i = i
@@ -477,7 +477,7 @@ def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
 
 @[inline]
 def size (self : UnionFind ι P S) (i : ι) (hi : self.IsRoot i) : ℕ :=
-  MutableQuotient.getMkEq self
+  MutableQuotient.liftOnMkEq self
     (fun x hx ↦ x.size i (by
       induction self using MutableQuotient.ind
       rw [UnionFindImpl.UnionFindWF.isRoot_iff_root, hx, ← hi]

@@ -12,16 +12,13 @@ protected def Thunk'.pure (a : α) : Thunk' α :=
   .mk fun _ ↦ a
 
 protected def Thunk'.get (x : Thunk' α) : α :=
-  Mutable.getModify₂ x (fun f ↦ let a := f (); ⟨a, fun _ ↦ a⟩) (fun _ ↦ rfl)
+  Mutable.getModify x (fun f ↦ let a := f (); ⟨a, fun _ ↦ a⟩) (fun _ ↦ rfl)
 
 @[inline] protected def Thunk'.map (f : α → β) (x : Thunk' α) : Thunk' β :=
   .mk fun _ => f x.get
 
 @[inline] protected def Thunk'.bind (x : Thunk' α) (f : α → Thunk' β) : Thunk' β :=
   .mk fun _ => (f x.get).get
-
-def List.sum [OfNat α 0] [Add α] : List α → α :=
-  foldl (· + ·) 0
 
 #eval show IO Unit from do
   let _ : OfNat (Thunk' Nat) 0 := ⟨.pure 0⟩

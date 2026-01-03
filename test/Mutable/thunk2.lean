@@ -12,7 +12,7 @@ protected def Thunk'.pure (a : α) : Thunk' α :=
   .mk fun _ ↦ a
 
 protected def Thunk'.get (x : Thunk' α) : α :=
-  Mutable.getModify₂ x (fun f ↦ let a := f (); ⟨a, fun _ ↦ a⟩) (fun _ ↦ rfl)
+  Mutable.getModify x (fun f ↦ let a := f (); ⟨a, fun _ ↦ a⟩) (fun _ ↦ rfl)
 
 /-! lean4/tests/compiler/thunk.lean -/
 
@@ -27,4 +27,4 @@ def main : IO Unit :=
   IO.println (toString (test (compute 1) 100000))
 
 /-- info: 10000000000 -/
-#guard_msgs in #eval main -- TODO: 超时中断
+#guard_msgs in #eval main
