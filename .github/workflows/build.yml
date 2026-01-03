@@ -129,13 +129,13 @@ jobs:
           lake exe graph
           rm import_graph.dot
 
-      # - name: test algorithm
-      #   id: test
-      #   uses: liskin/gh-problem-matcher-wrap@v3
-      #   with:
-      #     linters: gcc
-      #     run:
-      #       lake test
+      - name: test algorithm
+        id: test
+        uses: liskin/gh-problem-matcher-wrap@v3
+        with:
+          linters: gcc
+          run:
+            lake test
 
       - name: check for unused imports
         id: shake

@@ -17,6 +17,7 @@ abbrev algorithmLeanOptions := #[
     algorithmOnlyLinters.map fun s ↦ { s with name := `weak ++ s.name }
 
 package algorithm where
+  testDriver := "AlgorithmTest"
 
 lean_lib Mutable where
   roots := #[`Mutable]
@@ -30,6 +31,9 @@ lean_lib Algorithm where
     "-lstdc++"
   ]
 
+lean_lib AlgorithmTest where
+  globs := #[.submodules `AlgorithmTest]
+
 target ffi.o pkg : System.FilePath := do
   let oFile := pkg.buildDir / "cpp" / "ffi.o"
   let srcJob ← inputBinFile <| pkg.dir / "cpp" / "ffi.cpp"
@@ -40,7 +44,3 @@ extern_lib libleanffi pkg := do
   let name := nameToStaticLib "leanffi"
   let ffiO ← ffi.o.fetch
   buildStaticLib (pkg.staticLibDir / name) #[ffiO]
-
--- @[test_driver]
--- lean_exe test where
---   srcDir := "scripts"
