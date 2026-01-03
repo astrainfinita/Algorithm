@@ -17,67 +17,71 @@ structure Mutable (α : Type u) : Type u where
   mk ::
   get : α
 
-attribute [extern "lean_mk_Mutable"] Mutable.mk
-attribute [extern "lean_Mutable_get"] Mutable.get
-
-variable {α : Type u}
-
-@[extern "lean_Mutable_get_with"]
-protected def Mutable.getWith (x : @& Mutable α) (f : α → α) : α :=
-  x.get
+attribute [extern "lean_st_mk_ref"] Mutable.mk
+attribute [extern "lean_st_ref_get"] Mutable.get
 -/
 
-structure Mutable (α : Type u) : Type u where
-  private __mk__ ::
-  private __get__ : α
+opaque MutableAux (α : Type u) : Subtype (· = α) := ⟨α, rfl⟩
+
+def Mutable (α : Type u) : Type u := (MutableAux α).val
 
 namespace Mutable
 variable {α : Type u} {β : Type v}
 
-@[extern "lean_mk_Mutable"]
-def mk (a : α) : Mutable α := __mk__ a
+@[extern "lean_st_mk_ref"]
+def mk (a : α) : Mutable α := (MutableAux α).2.mpr a
 
-@[extern "lean_Mutable_get"]
-def get (a : @& Mutable α) : α := __get__ a
+@[extern "lean_st_ref_get", never_extract]
+def get (x : @& Mutable α) : α := (MutableAux α).2.mp x
 
-theorem ext {x y : Mutable α} (get : x.get = y.get) : x = y :=
-  match x, y, get with | ⟨_⟩, ⟨_⟩, rfl => rfl
+set_option linter.unusedVariables false in
+@[extern "lean_Mutable_set", never_extract]
+unsafe def set (x : @& Mutable α) (a : α) (b : @& β) : β := b
+
+@[simp] theorem mk_get (x : Mutable α) : mk x.get = x := by simp [mk, Mutable.get]
+@[simp] theorem get_mk (x : α) : (mk x).get = x := by simp [mk, Mutable.get]
+
+def rec {motive : Mutable α → Sort _} (h : ∀ a, motive (mk a)) (x : Mutable α) : motive x :=
+  mk_get x ▸ h _
+
+theorem ext {x y : Mutable α} (get : x.get = y.get) : x = y := by
+  simpa [Mutable.get] using congrArg (MutableAux α).2.mpr get
 
 theorem ext_iff {x y : Mutable α} : x = y ↔ x.get = y.get :=
   ⟨congrArg get, ext⟩
 
 @[simp]
-theorem mk_eq_mk {x y : α} : mk x = mk y ↔ x = y :=
-  ext_iff
+theorem mk_inj {x y : α} : mk x = mk y ↔ x = y :=
+  ext_iff.trans (by simp)
+
+unsafe def modifyUnsafe (x : Mutable α) (f : α → α) : α :=
+  let a := f x.get; x.set a a
 
 set_option linter.unusedVariables false in
-@[extern "lean_Mutable_modify"]
-unsafe def getModifyUnsafe (x : @& Mutable α) (f : α → α) : α :=
-  x.get
-
-set_option linter.unusedVariables false in
-unsafe abbrev getModifyImpl (x : Mutable α)
+unsafe abbrev modifyImpl (x : Mutable α)
     (f : α → α) (hf : ∀ a, f a = a) : α :=
-  Mutable.getModifyUnsafe x f
+  Mutable.modifyUnsafe x f
 
-@[implemented_by Mutable.getModifyImpl]
-def getModify (x : Mutable α)
+@[implemented_by Mutable.modifyImpl]
+def modify (x : Mutable α)
     (f : α → α) (hf : ∀ a, f a = a) : α :=
   f x.get
 
-set_option linter.unusedVariables false in
-@[extern "lean_Mutable_modify2"]
-unsafe def getModify₂Unsafe (x : @& Mutable α) (f : α → β × α) : β :=
-  (f x.get).fst
+unsafe def getModifyUnsafe (x : Mutable α) (f : α → β × α) : β :=
+  let (b, a) := f x.get; x.set a b
 
 set_option linter.unusedVariables false in
-unsafe abbrev getModify₂Impl (x : Mutable α)
+unsafe abbrev getModifyImpl (x : Mutable α)
     (f : α → β × α) (hgf : ∀ a, (f a).snd = a) : β :=
-  Mutable.getModify₂Unsafe x f
+  Mutable.getModifyUnsafe x f
 
-@[implemented_by Mutable.getModify₂Impl]
-def getModify₂ (x : Mutable α)
-    (f : α → β × α) (hgf : ∀ a, (f a).snd = a) : β :=
+@[implemented_by Mutable.getModifyImpl]
+def getModify (x : Mutable α) (f : α → β × α) (hgf : ∀ a, (f a).snd = a) : β :=
   (f x.get).fst
+
+@[simp]
+theorem getModify_mk {a : α} {f : α → β × α} {hgf : ∀ a, (f a).snd = a} :
+    (mk a).getModify f hgf = (f a).fst := by
+  simp [getModify]
 
 end Mutable

@@ -34,20 +34,22 @@ namespace MutableQuotient
 def mk (m : α → M) (a : α) : MutableQuotient α m := Mutable.mk ⟦a⟧
 
 @[inline]
-def get (x : MutableQuotient α m) (f : α → β) (hf : ∀ a₁ a₂, m a₁ = m a₂ → f a₁ = f a₂) : β :=
+def lift (x : MutableQuotient α m) (f : α → β) (hf : ∀ a₁ a₂, m a₁ = m a₂ → f a₁ = f a₂) : β :=
   (Mutable.get x).lift f fun _ _ h ↦ hf _ _ (by exact h)
 
 @[simp]
-lemma mk_get (m : α → M) (a : α) (f : α → β) (hf : ∀ a₁ a₂, m a₁ = m a₂ → f a₁ = f a₂) :
-    (mk m a).get f hf = f a :=
-  rfl
+lemma mk_lift (m : α → M) (a : α) (f : α → β) (hf : ∀ a₁ a₂, m a₁ = m a₂ → f a₁ = f a₂) :
+    (mk m a).lift f hf = f a := by
+  -- rfl
+  simp [mk, lift]
 
 @[elab_as_elim, induction_eliminator]
 lemma ind {motive : MutableQuotient α m → Prop} (h : ∀ (a : α), motive (mk m a)) (x) : motive x :=
-  Quotient.ind (motive := fun x ↦ motive (Mutable.mk x)) h (Mutable.get x)
+  -- Quotient.ind (motive := fun x ↦ motive (Mutable.mk x)) h (Mutable.get x)
+  Mutable.rec (Quotient.ind h) x
 
 @[inline]
-def getMkEq (x : MutableQuotient α m) (f : ∀ a : α, m a = x.get m (fun _ _ ↦ id) → β)
+def liftOnMkEq (x : MutableQuotient α m) (f : ∀ a : α, m a = x.lift m (fun _ _ ↦ id) → β)
     (hf : ∀ a₁ ha₁ a₂ ha₂, f a₁ ha₁ = f a₂ ha₂) : β :=
   (Mutable.get x).liftOnMkEq (fun a ha ↦ f a (congr_arg (Quotient.lift m _) ha))
     (fun _ _ _ _ ↦ hf _ _ _ _)
@@ -55,24 +57,20 @@ def getMkEq (x : MutableQuotient α m) (f : ∀ a : α, m a = x.get m (fun _ _ �
 @[inline]
 def map (x : MutableQuotient α m) (f : α → α) (hf : ∀ a₁ a₂, m a₁ = m a₂ → m (f a₁) = m (f a₂)) :
     MutableQuotient α m :=
-  get x (fun a ↦ mk m (f a)) (Mutable.ext <| Quotient.sound <| hf · · ·)
-
--- def getModify (x : MutableQuotient α m) (f : α → β) (hf : ∀ a₁ a₂, m a₁ = m a₂ → f a₁ = f a₂)
---     (r : α → α) (hr : ∀ a, m (r a) = m a) : β :=
---   (Mutable.getModify x (Quotient.map' r (fun a₁ a₂ h ↦ (hr a₁).trans h |>.trans (hr a₂).symm))
---     (Quotient.ind fun a ↦ Quotient.sound (hr a))).lift f fun _ _ h ↦ hf _ _ (by exact h)
+  lift x (fun a ↦ mk m (f a)) (Mutable.mk_inj.mpr <| Quotient.sound <| hf · · ·)
 
 @[inline]
-def getModify (x : MutableQuotient α m) (fr : α → β × α)
+def liftModify (x : MutableQuotient α m) (fr : α → β × α)
     (hf : ∀ a₁ a₂, m a₁ = m a₂ → (fr a₁).fst = (fr a₂).fst) (hr : ∀ a, m (fr a).snd = m a) : β :=
-  Mutable.getModify₂ x (Quotient.lift (let ⟨x, y⟩ := fr ·; (x, ⟦y⟧)) (fun a₁ a₂ h ↦
+  Mutable.getModify x (Quotient.lift (let ⟨x, y⟩ := fr ·; (x, ⟦y⟧)) (fun a₁ a₂ h ↦
       Prod.ext (hf a₁ a₂ h) <| Quotient.sound <| (hr a₁).trans <| h.trans (hr a₂).symm))
     (Quotient.ind fun a ↦ Quotient.sound (hr a))
 
 @[simp]
-lemma mk_getModify (m : α → M) (a : α) (fr : α → β × α)
+lemma mk_liftModify (m : α → M) (a : α) (fr : α → β × α)
     (hf : ∀ a₁ a₂, m a₁ = m a₂ → (fr a₁).fst = (fr a₂).fst) (hr : ∀ a, m (fr a).snd = m a) :
-    (mk m a).getModify fr hf hr = (fr a).fst :=
-  rfl
+    (mk m a).liftModify fr hf hr = (fr a).fst := by
+  -- rfl
+  simp [mk, liftModify]
 
 end MutableQuotient
