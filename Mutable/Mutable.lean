@@ -17,8 +17,8 @@ structure Mutable (α : Type u) : Type u where
   mk ::
   get : α
 
-attribute [extern "lean_mk_Mutable"] Mutable.mk
-attribute [extern "lean_Mutable_get"] Mutable.get
+attribute [extern "lean_st_mk_ref"] Mutable.mk
+attribute [extern "lean_st_ref_get"] Mutable.get
 -/
 
 opaque MutableAux (α : Type u) : Subtype (· = α) := ⟨α, rfl⟩
@@ -38,6 +38,12 @@ set_option linter.unusedVariables false in
 @[extern "lean_Mutable_set", never_extract]
 unsafe def set (x : @& Mutable α) (a : α) (b : @& β) : β := b
 
+@[simp] theorem mk_get (x : Mutable α) : mk x.get = x := by simp [mk, Mutable.get]
+@[simp] theorem get_mk (x : α) : (mk x).get = x := by simp [mk, Mutable.get]
+
+def rec {motive : Mutable α → Sort _} (h : ∀ a, motive (mk a)) (x : Mutable α) : motive x :=
+  mk_get x ▸ h _
+
 theorem ext {x y : Mutable α} (get : x.get = y.get) : x = y := by
   simpa [Mutable.get] using congrArg (MutableAux α).2.mpr get
 
@@ -45,7 +51,8 @@ theorem ext_iff {x y : Mutable α} : x = y ↔ x.get = y.get :=
   ⟨congrArg get, ext⟩
 
 @[simp]
-axiom mk_eq_mk {x y : α} : mk x = mk y ↔ x = y
+theorem mk_inj {x y : α} : mk x = mk y ↔ x = y :=
+  ext_iff.trans (by simp)
 
 unsafe def modifyUnsafe (x : Mutable α) (f : α → α) : α :=
   let a := f x.get; x.set a a
@@ -71,5 +78,10 @@ unsafe abbrev getModifyImpl (x : Mutable α)
 @[implemented_by Mutable.getModifyImpl]
 def getModify (x : Mutable α) (f : α → β × α) (hgf : ∀ a, (f a).snd = a) : β :=
   (f x.get).fst
+
+@[simp]
+theorem getModify_mk {a : α} {f : α → β × α} {hgf : ∀ a, (f a).snd = a} :
+    (mk a).getModify f hgf = (f a).fst := by
+  simp [getModify]
 
 end Mutable
