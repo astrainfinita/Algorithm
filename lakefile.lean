@@ -18,29 +18,12 @@ abbrev algorithmLeanOptions := #[
 
 package algorithm where
   testDriver := "AlgorithmTest"
-
-lean_lib Mutable where
-  roots := #[`Mutable]
-  precompileModules := true
+  lintDriver := "batteries/runLinter"
+  lintDriverArgs := #["Algorithm"]
 
 @[default_target]
 lean_lib Algorithm where
   leanOptions := algorithmLeanOptions
-  moreLinkArgs := #[
-    "-L./.lake/build/lib",
-    "-lstdc++"
-  ]
 
 lean_lib AlgorithmTest where
   globs := #[.submodules `AlgorithmTest]
-
-target ffi.o pkg : System.FilePath := do
-  let oFile := pkg.buildDir / "cpp" / "ffi.o"
-  let srcJob ← inputBinFile <| pkg.dir / "cpp" / "ffi.cpp"
-  let weakArgs := #["-I", (← getLeanIncludeDir).toString]
-  buildO oFile srcJob weakArgs #["-fPIC"] "clang++" getLeanTrace
-
-extern_lib libleanffi pkg := do
-  let name := nameToStaticLib "leanffi"
-  let ffiO ← ffi.o.fetch
-  buildStaticLib (pkg.staticLibDir / name) #[ffiO]
