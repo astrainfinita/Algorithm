@@ -18,6 +18,8 @@ abbrev algorithmLeanOptions := #[
 
 package algorithm where
   testDriver := "AlgorithmTest"
+  lintDriver := "batteries/runLinter"
+  lintDriverArgs := #["Algorithm"]
 
 @[default_target]
 lean_lib Algorithm where

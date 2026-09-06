@@ -1,152 +1,135 @@
-on:
-  push:
-
 name: continuous integration
 
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 concurrency:
-  # label each workflow run; only the latest with each label will run
-  # workflows on master get more expressive labels
-  group: ${{ github.workflow }}-${{ github.ref }}.
-    ${{ ( contains(fromJSON( '["refs/heads/master", "refs/heads/staging"]'), github.ref ) && github.run_id) || ''}}
-  # cancel any running workflow with the same label
+  # Preserve every master/staging run; cancel superseded branch/PR runs.
+  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/staging') && github.run_id || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      LEAN_ABORT_ON_PANIC: '1'
     steps:
-      - name: cleanup
-        shell: bash    # This *just* deletes old files, so is safe to run outside landrun.
-        run: |
-          if ! find . -mindepth 1 -exec rm -rf -- {} +; then
-            echo "ERROR: Initial cleanup failed, waiting 5 seconds and retrying..."
-            sleep 5
-            find . -mindepth 1 -exec rm -rf -- {} +
-          fi
-          # Delete all but the 5 most recent toolchains.
-          # Make sure to delete both the `~/.elan/toolchains/X` directory and the `~/.elan/update-hashes/X` file.
-          # Skip symbolic links (`-type d`), the current directory (`! -name .`), and `nightly` and `stable`.
-          if cd ~/.elan/toolchains && find . -maxdepth 1 -type d ! -name . -print0 | xargs -0 ls -1td | grep -v 'nightly$' | grep -v 'stable$' | tail -n +6 | xargs -I {} sh -c 'echo {} && rm -rf "{}" && rm "../update-hashes/{}"'; then
-              : # Do nothing on success
-          else
-              : # Do nothing on failure, but suppress errors
-          fi
+      - uses: actions/checkout@v7.0.1
 
-      # The Hoskinson runners may not have jq installed, so do that now.
-      - name: 'Setup jq'
-        uses: dcarbone/install-jq-action@f0e10f46ff84f4d32178b4b76e1ef180b16f82c3 # v3.1.1
+      - name: Enable Lean annotations
+        # This fork supports Lean diagnostics and has no release tags.
+        uses: leanprover-community/gh-problem-matcher-wrap@65a654fcdf7b64ff7633bc7a558f7b46d59a27bf # 2026-06-25
+        with:
+          action: add
+          linters: lean, gcc
 
-      # NOTE: if you copy this, consider using `leanprover/lean-action` instead.
-      # We install manually, to avoid running lean outside landrun.
-      - name: install elan
+      - name: Build, test, and check imports
+        id: lean
+        uses: leanprover/lean-action@v1.6.0
+        with:
+          build: true
+          build-args: '--wfail -KCI'
+          test: true
+          # Run lint separately so it also runs if the build or a later check fails.
+          lint: false
+          mk_all-check: true
+          mk_all-args: '--lib Algorithm'
+          reinstall-transient-toolchain: true
+
+      - name: Check for unexpected output
         shell: bash
         run: |
-          set -o pipefail
-          curl -o elan-init.sh -sSfL https://elan.lean-lang.org/elan-init.sh
-          chmod +x elan-init.sh
-          ./elan-init.sh -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "${GITHUB_PATH}"
-
-      - uses: actions/checkout@v4
-
-      - name: If using a lean-pr-release toolchain, uninstall
-        run: |
-          if [[ $(cat lean-toolchain) =~ ^leanprover/lean4-pr-releases:pr-release-[0-9]+$ ]]; then
-            printf 'Uninstalling transient toolchain %s\n' "$(cat lean-toolchain)"
-            elan toolchain uninstall "$(cat lean-toolchain)"
+          if output="$(lake build -q --iofail Algorithm)" && [[ -z "$output" ]]; then
+            exit 0
           fi
+          printf '%s\n' "$output"
+          exit 1
 
-      - name: print lean and lake versions
-        run: |
-          lean --version
-          lake --version
-
-      - name: build cache
-        run: |
-          lake build cache
-
-      - name: prune ProofWidgets .lake
-        run: |
-          # The ProofWidgets release contains not just the `.js` (which we need in order to build)
-          # but also `.oleans`, which may have been built with the wrong toolchain.
-          # This removes them.
-          # See discussion at https://leanprover.zulipchat.com/#narrow/stream/287929-mathlib4/topic/nightly-testing/near/411225235
-          rm -rf .lake/packages/proofwidgets/.lake/build/lib
-          rm -rf .lake/packages/proofwidgets/.lake/build/ir
-
-      - name: get cache
-        id: get
-        run: |
-          rm -rf .lake/build/lib/Algorithm/
-          lake exe cache get
-
-      - name: update Algorithm.lean
-        id: mk_all
-        continue-on-error: true # Allow workflow to continue, outcome checked later
-        # This runs `mk_all --lib Algorithm --check` from the `pr-branch` inside landrun
-        run: |
-          cd pr-branch
-          echo "Running mk_all --lib Algorithm --check (from pr-branch)..."
-          lake exe mk_all --lib Algorithm --check
-
-      - name: build algorithm
-        id: build
-        uses: liskin/gh-problem-matcher-wrap@v3
-        with:
-          linters: gcc
-          run: |
-            bash -o pipefail -c "env LEAN_ABORT_ON_PANIC=1 lake build --wfail -KCI"
-
-      - name: Check Algorithm.lean
-        run: |
-          if [ ${{ steps.mk_all.outputs.mk_all }} == "false" ]
-          then
-            echo "Please run 'lake exe mk_all --lib Algorithm' to regenerate the import all file"
-            exit 1
-          fi
-
-      - name: check for noisy stdout lines
-        id: noisy
-        run: |
-          buildMsgs="$(
-            ##  we exploit `lake`s replay feature: since the cache is present, running
-            ##  `lake build` will reproduce all the outputs without having to recompute
-            lake build Algorithm |
-            ##  we filter out the output lines that begin with `✔ [xx/yy]`, where xx, yy
-            ##  are either numbers or ?, and the "Build completed successfully." message.
-            ##  We keep the rest, which are actual outputs of the files
-            awk '!($0 ~ "^\\s*✔ \\[[?0-9]*/[?0-9]*\\]" || $0 ~ "^Build completed successfully( \\([0-9]+ jobs\\))?\\.?$"){ print $0 }')"
-          if [ -n "${buildMsgs}" ]
-          then
-            printf $'%s\n' "${buildMsgs}"
-            exit 1
-          fi
-
-      - name: verify `lake exe graph` works
+      - name: Check import graph generation
         run: |
           lake exe graph
           rm import_graph.dot
 
-      - name: test algorithm
-        id: test
-        uses: liskin/gh-problem-matcher-wrap@v3
-        with:
-          linters: gcc
-          run:
-            lake test
+      - name: Check unused imports
+        run: lake exe shake Algorithm --cfg scripts/noshake.json --gh-style
 
-      - name: check for unused imports
-        id: shake
-        uses: liskin/gh-problem-matcher-wrap@v3
-        with:
-          linters: gcc
-          run: env LEAN_ABORT_ON_PANIC=1 lake exe shake Algorithm --cfg scripts/noshake.json --gh-style
+      - name: Lint Algorithm
+        if: ${{ !cancelled() && (steps.lean.outputs.build-status == 'SUCCESS' || steps.lean.outputs.build-status == 'FAILURE') }}
+        run: lake lint
 
-      - name: lint algorithm
-        if: ${{ always() && steps.build.outcome == 'success' || steps.build.outcome == 'failure' }}
-        id: lint
-        uses: liskin/gh-problem-matcher-wrap@v3
+      - name: Disable Lean annotations
+        if: always()
+        uses: leanprover-community/gh-problem-matcher-wrap@65a654fcdf7b64ff7633bc7a558f7b46d59a27bf # 2026-06-25
         with:
-          linters: gcc
-          run: env LEAN_ABORT_ON_PANIC=1 lake exe runLinter Algorithm
+          action: remove
+          linters: lean, gcc
+
+  docs:
+    name: build docs
+    needs: build
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    env:
+      LEAN_ABORT_ON_PANIC: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1.6.0
+        with:
+          build: false
+          test: false
+          lint: false
+
+      - name: Build documentation
+        run: bash scripts/build-docs.sh
+
+      - name: Upload documentation
+        uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: .lake/docbuild/.lake/build/doc
+
+  deploy:
+    name: deploy docs
+    needs: docs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check whether this commit is still current
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_REPOSITORY: ${{ github.repository }}
+          CI_SHA: ${{ github.sha }}
+        run: |
+          branch_sha="$(gh api "repos/$CI_REPOSITORY/git/ref/heads/master" --jq .object.sha)"
+          if [[ "$branch_sha" == "$CI_SHA" ]]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping documentation deployment for superseded commit $CI_SHA."
+          fi
+
+      - name: Set up Pages
+        if: steps.current.outputs.publish == 'true'
+        uses: actions/configure-pages@v6.0.0
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        if: steps.current.outputs.publish == 'true'
+        uses: actions/deploy-pages@v5.0.1
