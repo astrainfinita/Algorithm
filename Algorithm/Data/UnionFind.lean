@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
 import Algorithm.Data.Classes.GetElem
-import Algorithm.Data.MutableQuotient
 import Mathlib.Data.Set.Card
+import Mathlib.Data.Setoid.Basic
 
 namespace UnionFindImpl
 
@@ -159,8 +159,8 @@ lemma root_of_parent_eq (self : UnionFind ι P S) (i : ι) (hi : self.parent[i] 
 def find (self : UnionFind ι P S) (i : ι) :
     ι × UnionFind ι P S :=
   let ⟨parent, size, wf⟩ := self
-  match h : findAux parent wf i with
-  | ⟨r, ps⟩ => ⟨r, ⟨ps, size, (show _ = ps from congr_arg Prod.snd h) ▸ wellFounded_findAux _ _ _⟩⟩
+  let f := findAux parent wf i
+  ⟨f.1, ⟨f.2, size, wellFounded_findAux _ _ _⟩⟩
 
 @[simp]
 lemma find_fst (self : UnionFind ι P S) (i : ι) :
@@ -171,6 +171,11 @@ lemma find_fst (self : UnionFind ι P S) (i : ι) :
 lemma find_snd_root (self : UnionFind ι P S) (i : ι) :
     (self.find i).snd.root = self.root :=
   rootCore_findAux_snd self.parent self.wf i _
+
+@[simp]
+lemma find_snd_size (self : UnionFind ι P S) (i : ι) :
+    (self.find i).snd.size = self.size :=
+  rfl
 
 omit [DecidableEq ι] in
 lemma wellFounded_defaultDictSet (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
@@ -252,7 +257,6 @@ lemma link_root (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i)
         if self.size[i] ≤ self.size[j] then j else i
       else
         self.root k := by
-  -- ext k; unfold link; aesop -- slightly
   ext k; unfold link; dsimp
   obtain (hij | rfl) := decEq i j
   · rw [if_neg hij]
@@ -260,13 +264,11 @@ lemma link_root (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i)
   · aesop
 
 def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
-  match hi : self.find i with
-  | ⟨ri, uf₁⟩ =>
-    match hj : self.find j with
-    | ⟨rj, uf₂⟩ =>
-      link self ri rj
-        (by simp [← show _ = ri from congr_arg Prod.fst hi])
-        (by simp [← show _ = rj from congr_arg Prod.fst hj])
+  let fi := self.find i
+  let fj := fi.snd.find j
+  link fj.snd fi.fst fj.fst
+    (by rw [← root_eq_self]; simp [fi, fj])
+    (by rw [← root_eq_self]; simp [fi, fj])
 
 @[simp]
 lemma union_root (self : UnionFind ι P S) (i j : ι) :
@@ -283,6 +285,10 @@ def WF (self : UnionFind ι P S) : Prop :=
 lemma wf_congr {x y : UnionFind ι P S}
     (hs : x.size = y.size) (hr : x.root = y.root) : x.WF ↔ y.WF := by
   simp_rw [WF, ← root_eq_self, hs]; rw [hr]
+
+lemma find_snd_wf (self : UnionFind ι P S) (i : ι) (h : self.WF) :
+    (self.find i).snd.WF :=
+  (wf_congr (self.find_snd_size i) (self.find_snd_root i)).mpr h
 
 lemma wf_iff_size_root {self : UnionFind ι P S} :
     self.WF ↔ ∀ i, self.size[self.root i] = {j : ι | self.root j = self.root i}.encard :=
@@ -323,7 +329,7 @@ lemma link_wf (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i) (hj
 
 lemma union_wf (self : UnionFind ι P S) (i j : ι) (h : self.WF) : (self.union i j).WF := by
   unfold union; dsimp
-  exact self.link_wf _ _ _ _ h
+  exact link_wf _ _ _ _ _ (find_snd_wf _ j (self.find_snd_wf i h))
 
 section default
 
@@ -394,10 +400,8 @@ lemma IsRoot.root (self : UnionFindWF ι P S) (i : ι) :
 abbrev find (self : UnionFindWF ι P S) (i : ι) :
     ι × UnionFindWF ι P S :=
   let ⟨x, hx⟩ := self
-  match h : x.find i with
-  | ⟨r, fx⟩ => ⟨r, ⟨fx, by
-    simpa only [← show _ = fx from congr_arg Prod.snd h,
-      UnionFind.wf_congr (by rfl) (x.find_snd_root i)]⟩⟩
+  let f := x.find i
+  ⟨f.1, ⟨f.2, x.find_snd_wf i hx⟩⟩
 
 @[simp]
 lemma find_fst (self : UnionFindWF ι P S) (i : ι) :
@@ -408,6 +412,10 @@ lemma find_fst (self : UnionFindWF ι P S) (i : ι) :
 lemma find_snd_root (self : UnionFindWF ι P S) (i : ι) :
     (self.find i).snd.root = self.root :=
   self.val.find_snd_root i
+
+lemma isRoot_iff_find {self : UnionFindWF ι P S} {i : ι} :
+    self.IsRoot i ↔ (self.find i).fst = i := by
+  simp [IsRoot]
 
 abbrev union (self : UnionFindWF ι P S) (i j : ι) : UnionFindWF ι P S :=
   ⟨self.val.union i j, self.val.union_wf i j self.prop⟩
@@ -444,7 +452,7 @@ end UnionFindImpl
 def UnionFind (ι : Type*) [DecidableEq ι]
     (P : Type*) [GetSetElemAllValid P ι ι]
     (S : Type*) [GetSetElemAllValid S ι ℕ] :=
-  MutableQuotient (UnionFindImpl.UnionFindWF ι P S) fun x ↦ x.root
+  Quotient <| .ker fun x : UnionFindImpl.UnionFindWF ι P S ↦ x.root
 
 namespace UnionFind
 
@@ -453,38 +461,42 @@ variable {ι : Type*} [DecidableEq ι]
     {S : Type*} [GetSetElemAllValid S ι ℕ]
 
 instance [OfFn P ι ι id] [OfFn S ι ℕ (fun _ ↦ 1)] : Inhabited (UnionFind ι P S) where
-  default := .mk _ ⟨default, UnionFindImpl.UnionFind.default_wf⟩
+  default := ⟦⟨default, UnionFindImpl.UnionFind.default_wf⟩⟧
 
 @[inline]
-def find (self : UnionFind ι P S) (i : ι) : ι :=
-  MutableQuotient.liftModify self (fun x ↦ x.find i) (by simp (config := { contextual := true }))
-    (by simp)
+def find (self : UnionFind ι P S) (i : ι) : ι × UnionFind ι P S :=
+  Quotient.liftOn' self (fun x ↦ let f := x.find i; (f.1, ⟦f.2⟧)) fun x y h ↦ by
+    rw [Setoid.ker_def] at h
+    ext
+    · simp [h]
+    · apply Quot.sound
+      simp [h]
 
-def IsRoot (self : UnionFind ι P S) (i : ι) : Prop := self.find i = i
+@[simp]
+lemma find_snd (self : UnionFind ι P S) (i : ι) : (self.find i).snd = self := by
+  induction self using Quotient.inductionOn with
+  | _ x => exact Quotient.sound (x.find_snd_root i)
 
-lemma find_isRoot (self : UnionFind ι P S) (i : ι) : self.IsRoot (self.find i) := by
-  induction self using MutableQuotient.ind
+def IsRoot (self : UnionFind ι P S) (i : ι) : Prop := (self.find i).fst = i
+
+lemma find_isRoot (self : UnionFind ι P S) (i : ι) :
+    (self.find i).snd.IsRoot (self.find i).fst := by
+  induction self using Quotient.inductionOn
   simp [IsRoot, find]
 
 @[inline]
 def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
-  MutableQuotient.map self (fun x ↦ x.union i j) fun _ _ h ↦ by
-    simp only [UnionFindImpl.UnionFindWF.union_root]
-    congr! 1
-    generalize_proofs h₁ h₂ h₃ h₄; revert h₁ h₂ h₃ h₄; rw [h]; intros
-    rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
-    rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq (h := h)]
+  self.map' (fun x ↦ x.union i j) fun x y h ↦ by
+    simp only [Setoid.ker_def] at h ⊢
+    simp only [UnionFindImpl.UnionFindWF.union_root,
+      UnionFindImpl.UnionFindWF.size_eq_ncard]
+    rw [h]
 
 @[inline]
 def size (self : UnionFind ι P S) (i : ι) (hi : self.IsRoot i) : ℕ :=
-  MutableQuotient.liftOnMkEq self
-    (fun x hx ↦ x.size i (by
-      induction self using MutableQuotient.ind
-      rw [UnionFindImpl.UnionFindWF.isRoot_iff_root, hx, ← hi]
-      simp [find]))
-    (fun _ hx₁ _ hx₂ ↦ by
-      dsimp
-      rw [UnionFindImpl.UnionFindWF.size_eq_of_root_eq]
-      rw [hx₁, hx₂])
+  self.hrecOn (fun x hx ↦ x.size i (UnionFindImpl.UnionFindWF.isRoot_iff_find.mpr hx))
+    (fun x y h ↦ Function.hfunext
+      (congrArg (fun self : UnionFind ι P S ↦ self.IsRoot i) (Quotient.sound h))
+      fun _ _ _ ↦ heq_of_eq <| UnionFindImpl.UnionFindWF.size_eq_of_root_eq x y i _ _ h) hi
 
 end UnionFind
