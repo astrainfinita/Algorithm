@@ -8,7 +8,6 @@ import Algorithm.Data.Classes.IndexedMinHeap
 import Algorithm.Data.Graph.AdjList
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Algebra.Order.Monoid.WithTop
-import Mathlib.Data.Finset.Card
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Set.Lattice
 import Mathlib.Tactic.Order
@@ -678,8 +677,53 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
         Set.mem_singleton_iff, exists_eq_left, Set.mem_insert_iff]
       tauto
 
+/-- Unsettled vertices incident to an edge or present in the heap.
+Including heap vertices accounts for isolated initial vertices. -/
+noncomputable def unsettledSupport (g : G)
+    {DistHeap DistArray : Type*}
+    [DefaultDict.ReadOnly DistHeap V (WithTop CostType) fun _ ↦ ⊤]
+    [DefaultDict.ReadOnly DistArray V (WithTop CostType) fun _ ↦ ⊤]
+    (heap : DistHeap) (res : DistArray) : Finset V := by
+  classical exact {v ∈ g..support ∪ (toDFinsupp' heap).support | res[v] = ⊤}
+
+lemma unsettledSupport_dijkstraStep [DecidableEq V] (g : G) (c : Info → CostType)
+    [AddCommMonoid CostType] [LinearOrder CostType]
+    {DistArray : Type*} [Inhabited DistArray]
+    [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
+    {DistHeap : Type*} [Inhabited DistHeap]
+    [IndexedMinHeap DistHeap V (WithTop CostType)]
+    (heap : DistHeap) (res : DistArray) (hh : heap[minIdx heap] ≠ ⊤)
+    (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) :
+    unsettledSupport g (dijkstraStep g c heap res hh).1 (dijkstraStep g c heap res hh).2 =
+      (unsettledSupport g heap res).erase (minIdx heap) := by
+  ext v
+  have hs : g..Adj (minIdx heap) v → v ∈ g..support := Adj.snd_mem_support
+  simp only [unsettledSupport, Finset.mem_filter, Finset.mem_union, Finset.mem_erase,
+    DFinsupp'.mem_support_toFun, coe_toDFinsupp'_eq_getElem, ne_eq,
+    dijkstraStep_fst_getElem_eq_top (spec₁ := spec₁), dijkstraStep_snd_getElem_eq_top,
+    mem_succSet_singleton_iff]
+  tauto
+
+lemma unsettledSupport_dijkstraStep_ssubset (g : G) (c : Info → CostType)
+    [AddCommMonoid CostType] [LinearOrder CostType]
+    {DistArray : Type*} [Inhabited DistArray]
+    [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
+    {DistHeap : Type*} [Inhabited DistHeap]
+    [IndexedMinHeap DistHeap V (WithTop CostType)]
+    (heap : DistHeap) (res : DistArray) (hh : heap[minIdx heap] ≠ ⊤)
+    (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) :
+    unsettledSupport g (dijkstraStep g c heap res hh).1
+      (dijkstraStep g c heap res hh).2 ⊂ unsettledSupport g heap res := by
+  classical
+  rw [unsettledSupport_dijkstraStep g c heap res hh spec₁]
+  apply Finset.erase_ssubset
+  simpa [unsettledSupport, DFinsupp'.mem_support_toFun, coe_toDFinsupp'_eq_getElem, hh]
+    using (spec₁ _).resolve_left hh
+
+private local instance : WellFoundedRelation (Finset V) := ⟨(· < ·), wellFounded_lt⟩
+
 def dijkstra (g : G) (c : Info → CostType)
-    [Fintype V] [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
+    [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
     (DistArray : Type*) [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
     {DistHeap : Type*} [Inhabited DistHeap] [IndexedMinHeap DistHeap V (WithTop CostType)]
     (init : DistHeap) :
@@ -693,14 +737,9 @@ where
       ⟨(heap, res), spec, hh⟩
     else
       let hr := g..dijkstraStep c heap res hh
-      have : Fintype.card {v : V | hr.2[v] = ⊤} < Fintype.card {v : V | res[v] = ⊤} := by
-        let +nondep : DecidableEq V := by classical infer_instance
-        simp only [dijkstraStep_snd_getElem_eq_top, ne_eq, Set.coe_setOf, hr]
-        exact Fintype.card_lt_of_injective_of_notMem (fun ⟨v, hv⟩ ↦ ⟨v, hv.2⟩)
-          (by intro ⟨v, hv⟩ ⟨w, hw⟩; simp)
-          (b := ⟨minIdx heap, (spec.1 _).resolve_left hh⟩) (by simp)
       go hr.1 hr.2 (g..dijkstraStep_spec c init heap res spec hh)
-termination_by Fintype.card {v : V | res[v] = ⊤}
+termination_by unsettledSupport g heap res
+decreasing_by exact unsettledSupport_dijkstraStep_ssubset g c heap res hh spec.1
   spec_init : dijkstraStep.Spec g c init init default := by
     constructor
     · simp
@@ -714,7 +753,7 @@ termination_by Fintype.card {v : V | res[v] = ⊤}
     · simp [traversal]
 
 lemma dijkstra_spec (g : G) (c : Info → CostType)
-    [Fintype V] [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
+    [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
     (DistArray : Type*) [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
     {DistHeap : Type*} [Inhabited DistHeap] [IndexedMinHeap DistHeap V (WithTop CostType)]
     (init : DistHeap) (v : V) :

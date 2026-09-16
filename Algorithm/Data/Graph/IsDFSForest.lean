@@ -6,8 +6,6 @@ Authors: Yuyang Zhao
 import Algorithm.Data.Classes.ToList
 import Algorithm.Data.Forest
 import Algorithm.Data.Graph.AdjList
-import Mathlib.Data.Finset.Card
-import Mathlib.Data.Fintype.Basic
 
 namespace AdjListClass
 variable
