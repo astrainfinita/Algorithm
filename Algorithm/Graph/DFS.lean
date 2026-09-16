@@ -33,11 +33,11 @@ lemma unvisitedSupport_set_true [DecidableEq V] (g : G) {BoolArray : Type*}
 
 lemma unvisitedSupport_set_true_ssubset (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
-    (visited : BoolArray) (v : V) (hvs : v ∈ g..support) (hv : visited[v] = false) :
+    (visited : BoolArray) (v : V) (hvs : v ∈ g..support) (hv : ¬visited[v]) :
     unvisitedSupport g visited[v ↦ true] ⊂ unvisitedSupport g visited := by
   classical
   rw [unvisitedSupport_set_true]
-  exact Finset.erase_ssubset (Finset.mem_filter.mpr ⟨hvs, by simp [hv]⟩)
+  exact Finset.erase_ssubset (Finset.mem_filter.mpr ⟨hvs, hv⟩)
 
 lemma unvisitedSupport_set_true_of_notMem (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
@@ -71,7 +71,7 @@ private lemma visited_set_true {BoolArray : Type*}
 in that case it suffices to decrease the worklist measure. -/
 private lemma dfs_visit_decreases (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
-    (visited : BoolArray) (v : V) (hv : visited[v] = false)
+    (visited : BoolArray) (v : V) (hv : ¬visited[v])
     {α : Type*} {r : α → α → Prop} {m n : α} (h : g..succList v = [] → r m n) :
     Prod.Lex (· < ·) r
       (unvisitedSupport g visited[v ↦ true], m)
@@ -103,7 +103,7 @@ termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
-  · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
+  · apply dfs_visit_decreases g visited v ‹_›
     intro hnil
     cases vs <;> simp +arith [hnil]
   · simpa [Prod.lex_iff] using
@@ -220,7 +220,7 @@ termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
-  · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
+  · apply dfs_visit_decreases g visited v ‹_›
     intro hnil
     cases vs <;> simp +arith [hnil]
   · simpa [Prod.lex_iff] using
@@ -266,7 +266,7 @@ decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
   · simp [Prod.lex_iff]
-  · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
+  · apply dfs_visit_decreases g visited v ‹_›
     intro hnil
     simp [hnil]
 
@@ -287,7 +287,7 @@ decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
   · simp [Prod.lex_iff]
-  · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
+  · apply dfs_visit_decreases g visited v ‹_›
     intro hnil
     simp [hnil, Prod.lex_iff]
 
@@ -306,7 +306,7 @@ termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
-  · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
+  · apply dfs_visit_decreases g visited v ‹_›
     intro hnil
     simp [hnil]
 
