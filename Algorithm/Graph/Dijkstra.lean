@@ -118,7 +118,7 @@ def IsLowerBoundOfEdges (g : G)
     (cs : ∀ s ∈ ss, CostType)
     (t : V) (d : WithTop CostType) : Prop :=
   d ∈ lowerBounds (⋃ s, ⋃ hs : s ∈ ss, Set.range
-    fun e : g..toQuiver s ⟶ g..toQuiver t ↦ ↑(cs s hs + c (e : g..E).info))
+    fun e : ToQuiver.mk g s ⟶ ToQuiver.mk g t ↦ ↑(cs s hs + c (e : E g).info))
 
 lemma IsLowerBoundOfEdges.elim {g : G}
     [AddMonoid CostType] [Preorder CostType]
@@ -126,9 +126,9 @@ lemma IsLowerBoundOfEdges.elim {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
-    (h : g..IsLowerBoundOfEdges c ss cs t d)
-    {s : V} (hs : s ∈ ss) (e : g..toQuiver s ⟶ g..toQuiver t) :
-    d ≤ cs s hs + c (e : g..E).info := by
+    (h : IsLowerBoundOfEdges g c ss cs t d)
+    {s : V} (hs : s ∈ ss) (e : ToQuiver.mk g s ⟶ ToQuiver.mk g t) :
+    d ≤ cs s hs + c (e : E g).info := by
   apply h
   simpa using ⟨s, hs, e, rfl⟩
 
@@ -138,9 +138,9 @@ lemma isLowerBoundOfEdges_iff {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsLowerBoundOfEdges c ss cs t d ↔
-      ∀ s, ∀ hs : s ∈ ss, ∀ e : g..toQuiver s ⟶ g..toQuiver t,
-        d ≤ cs s hs + c (e : g..E).info := by
+    IsLowerBoundOfEdges g c ss cs t d ↔
+      ∀ s, ∀ hs : s ∈ ss, ∀ e : ToQuiver.mk g s ⟶ ToQuiver.mk g t,
+        d ≤ cs s hs + c (e : E g).info := by
   constructor
   · intro h s hs e
     exact h.elim hs e
@@ -156,7 +156,7 @@ def IsLeastOfEdges (g : G)
     (cs : ∀ s ∈ ss, CostType)
     (t : V) (d : WithTop CostType) : Prop :=
   IsLeast (⋃ s, ⋃ hs : s ∈ ss, Set.range
-    fun e : g..toQuiver s ⟶ g..toQuiver t ↦ ↑(cs s hs + c (e : g..E).info)) d
+    fun e : ToQuiver.mk g s ⟶ ToQuiver.mk g t ↦ ↑(cs s hs + c (e : E g).info)) d
 
 lemma isLeastOfEdges_iff {g : G}
     [AddMonoid CostType] [Preorder CostType]
@@ -164,11 +164,11 @@ lemma isLeastOfEdges_iff {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsLeastOfEdges c ss cs t d ↔
-      (∃ s, ∃ hs : s ∈ ss, ∃ e : g..toQuiver s ⟶ g..toQuiver t,
-        cs s hs + c (e : g..E).info = d) ∧
-      ∀ s, ∀ hs : s ∈ ss, ∀ e : g..toQuiver s ⟶ g..toQuiver t,
-        d ≤ cs s hs + c (e : g..E).info :=
+    IsLeastOfEdges g c ss cs t d ↔
+      (∃ s, ∃ hs : s ∈ ss, ∃ e : ToQuiver.mk g s ⟶ ToQuiver.mk g t,
+        cs s hs + c (e : E g).info = d) ∧
+      ∀ s, ∀ hs : s ∈ ss, ∀ e : ToQuiver.mk g s ⟶ ToQuiver.mk g t,
+        d ≤ cs s hs + c (e : E g).info :=
   Iff.and (by simp) isLowerBoundOfEdges_iff
 
 lemma IsLeastOfEdges.isLowerBoundOfEdges {g : G}
@@ -177,8 +177,8 @@ lemma IsLeastOfEdges.isLowerBoundOfEdges {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
-    (h : g..IsLeastOfEdges c ss cs t d) :
-    g..IsLowerBoundOfEdges c ss cs t d :=
+    (h : IsLeastOfEdges g c ss cs t d) :
+    IsLowerBoundOfEdges g c ss cs t d :=
   h.2
 
 lemma isLeastOfEdges_congr {g : G}
@@ -188,7 +188,7 @@ lemma isLeastOfEdges_congr {g : G}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
-    g..IsLeastOfEdges c ss cs t d = g..IsLeastOfEdges c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
+    IsLeastOfEdges g c ss cs t d = IsLeastOfEdges g c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
   subst hs
   rfl
 
@@ -198,11 +198,11 @@ lemma isLeastOfEdges_union {g : G}
     {ss ss' : Set V}
     {cs : ∀ s ∈ ss ∪ ss', CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsLeastOfEdges c (ss ∪ ss') cs t d ↔
-      g..IsLeastOfEdges c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsLowerBoundOfEdges c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
-      g..IsLowerBoundOfEdges c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsLeastOfEdges c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
+    IsLeastOfEdges g c (ss ∪ ss') cs t d ↔
+      IsLeastOfEdges g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsLowerBoundOfEdges g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
+      IsLowerBoundOfEdges g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsLeastOfEdges g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
   unfold IsLeastOfEdges
   -- was `simp_rw [Set.mem_union]`
   conv_lhs => congr; congr; ext; rw [Set.iUnion_congr_Prop (Set.mem_union _ _ _) fun _ ↦ rfl]
@@ -216,8 +216,8 @@ def IsLowerBoundOfDist (g : G)
     (cs : ∀ s ∈ ss, CostType)
     (t : V) (d : WithTop CostType) : Prop :=
   d ∈ lowerBounds (⋃ s, ⋃ hs : s ∈ ss, Set.range
-    fun p : Quiver.Path (g..toQuiver s) (g..toQuiver t) ↦
-      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info))
+    fun p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t) ↦
+      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : E g).info))
 
 lemma IsLowerBoundOfDist.elim {g : G}
     [AddMonoid CostType] [Preorder CostType]
@@ -225,9 +225,9 @@ lemma IsLowerBoundOfDist.elim {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
-    (h : g..IsLowerBoundOfDist c ss cs t d)
-    {s : V} (hs : s ∈ ss) (p : Quiver.Path (g..toQuiver s) (g..toQuiver t)) :
-    d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info := by
+    (h : IsLowerBoundOfDist g c ss cs t d)
+    {s : V} (hs : s ∈ ss) (p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t)) :
+    d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : E g).info := by
   apply h
   simpa using ⟨s, hs, p, rfl⟩
 
@@ -237,9 +237,9 @@ lemma isLowerBoundOfDist_iff {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsLowerBoundOfDist c ss cs t d ↔
-      ∀ s, ∀ hs : s ∈ ss, ∀ p : Quiver.Path (g..toQuiver s) (g..toQuiver t),
-        d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info := by
+    IsLowerBoundOfDist g c ss cs t d ↔
+      ∀ s, ∀ hs : s ∈ ss, ∀ p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t),
+        d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : E g).info := by
   constructor
   · intro h s hs e
     exact h.elim hs e
@@ -255,8 +255,8 @@ def IsDist' (g : G)
     (cs : ∀ s ∈ ss, CostType)
     (t : V) (d : WithTop CostType) : Prop :=
   IsLeast (⋃ s, ⋃ hs : s ∈ ss, Set.range
-    fun p : Quiver.Path (g..toQuiver s) (g..toQuiver t) ↦
-      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info)) d
+    fun p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t) ↦
+      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : E g).info)) d
 
 lemma isDist'_iff {g : G}
     [AddMonoid CostType] [Preorder CostType]
@@ -264,11 +264,11 @@ lemma isDist'_iff {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsDist' c ss cs t d ↔
-      (∃ s, ∃ hs : s ∈ ss, ∃ p : Quiver.Path (g..toQuiver s) (g..toQuiver t),
-        cs s hs + (p.cost fun _ _ e ↦ c (e : g..E).info) = d) ∧
-      ∀ s, ∀ hs : s ∈ ss, ∀ p : Quiver.Path (g..toQuiver s) (g..toQuiver t),
-        d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info :=
+    IsDist' g c ss cs t d ↔
+      (∃ s, ∃ hs : s ∈ ss, ∃ p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t),
+        cs s hs + (p.cost fun _ _ e ↦ c (e : E g).info) = d) ∧
+      ∀ s, ∀ hs : s ∈ ss, ∀ p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t),
+        d ≤ cs s hs + p.cost fun _ _ e ↦ c (e : E g).info :=
   Iff.and (by simp) isLowerBoundOfDist_iff
 
 lemma IsDist'.isLowerBoundOfDist {g : G}
@@ -277,8 +277,8 @@ lemma IsDist'.isLowerBoundOfDist {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
-    (h : g..IsDist' c ss cs t d) :
-    g..IsLowerBoundOfDist c ss cs t d :=
+    (h : IsDist' g c ss cs t d) :
+    IsLowerBoundOfDist g c ss cs t d :=
   h.2
 
 lemma isDist'_congr {g : G}
@@ -288,7 +288,7 @@ lemma isDist'_congr {g : G}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
-    g..IsDist' c ss cs t d = g..IsDist' c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
+    IsDist' g c ss cs t d = IsDist' g c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
   subst hs
   rfl
 
@@ -298,11 +298,11 @@ lemma isDist'_union {g : G}
     {ss ss' : Set V}
     {cs : ∀ s ∈ ss ∪ ss', CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsDist' c (ss ∪ ss') cs t d ↔
-      g..IsDist' c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsLowerBoundOfDist c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
-      g..IsLowerBoundOfDist c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsDist' c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
+    IsDist' g c (ss ∪ ss') cs t d ↔
+      IsDist' g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsLowerBoundOfDist g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
+      IsLowerBoundOfDist g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsDist' g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
   unfold IsDist'
   simp_rw [Set.mem_union, Set.iUnion_or, Set.iUnion_union_distrib, isLeast_union_iff]
   rfl
@@ -314,8 +314,8 @@ def IsDist (g : G)
     (cs : ∀ s ∈ ss, CostType)
     (t : V) (d : WithTop CostType) : Prop :=
   IsGLB (⋃ s, ⋃ hs : s ∈ ss, Set.range
-    fun p : Quiver.Path (g..toQuiver s) (g..toQuiver t) ↦
-      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : g..E).info)) d
+    fun p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t) ↦
+      ↑(cs s hs + p.cost fun _ _ e ↦ c (e : E g).info)) d
 
 lemma isDist_top_iff {g : G}
     [AddMonoid CostType] [Preorder CostType]
@@ -323,7 +323,7 @@ lemma isDist_top_iff {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} :
-    g..IsDist c ss cs t ⊤ ↔ ∀ s ∈ ss, ¬g..Reachable s t := by
+    IsDist g c ss cs t ⊤ ↔ ∀ s ∈ ss, ¬Reachable g s t := by
   constructor
   · simp only [IsDist, WithTop.coe_add, isGLB_iff_le_iff, le_top, true_iff]
     intro h
@@ -347,8 +347,8 @@ lemma IsDist.isLowerBoundOfDist {g : G}
     {ss : Set V}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
-    (h : g..IsDist c ss cs t d) :
-    g..IsLowerBoundOfDist c ss cs t d :=
+    (h : IsDist g c ss cs t d) :
+    IsLowerBoundOfDist g c ss cs t d :=
   h.1
 
 lemma isDist_congr {g : G}
@@ -358,7 +358,7 @@ lemma isDist_congr {g : G}
     {cs : ∀ s ∈ ss, CostType}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
-    g..IsDist c ss cs t d = g..IsDist c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
+    IsDist g c ss cs t d = IsDist g c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
   subst hs
   rfl
 
@@ -368,11 +368,11 @@ lemma isDist_union {g : G}
     {ss ss' : Set V}
     {cs : ∀ s ∈ ss ∪ ss', CostType}
     {t : V} {d : WithTop CostType} :
-    g..IsDist c (ss ∪ ss') cs t d ↔
-      g..IsDist c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsLowerBoundOfDist c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
-      g..IsLowerBoundOfDist c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
-        g..IsDist c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
+    IsDist g c (ss ∪ ss') cs t d ↔
+      IsDist g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsLowerBoundOfDist g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d ∨
+      IsLowerBoundOfDist g c ss (fun v hv ↦ cs v (Set.mem_union_left _ hv)) t d ∧
+        IsDist g c ss' (fun v hv ↦ cs v (Set.mem_union_right _ hv)) t d := by
   unfold IsDist
   simp_rw [Set.mem_union, Set.iUnion_or, Set.iUnion_union_distrib, isGLB_union_iff]
   rfl
@@ -389,7 +389,7 @@ def dijkstraStep (g : G) (c : Info → CostType)
   let r := res[v ↦ ↑d]
   (decreaseKeysD heap[v ↦ ⊤] <|
     (toList g[v]).filterMap fun e ↦
-      if r[g..snd e] = ⊤ then some (g..snd e, ↑(d + c e)) else none,
+      if r[snd g e] = ⊤ then some (snd g e, ↑(d + c e)) else none,
     r)
 
 structure dijkstraStep.Spec (g : G) (c : Info → CostType)
@@ -399,12 +399,12 @@ structure dijkstraStep.Spec (g : G) (c : Info → CostType)
     (init : DistHeap) (heap : DistHeap) (res : DistArray) : Prop where
   h₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤
   h₂ : ∀ v : V, res[v] = ⊤ → ∃ d, heap[v] = min init[v] d ∧
-    ((d = ⊤ ∧ ∀ s : V, res[s] ≠ ⊤ → IsEmpty (g..toQuiver s ⟶ g..toQuiver v)) ∨
-      g..IsLeastOfEdges c {s | res[s] ≠ ⊤} (fun s hs ↦ res[s].untop hs) v d)
+    ((d = ⊤ ∧ ∀ s : V, res[s] ≠ ⊤ → IsEmpty (ToQuiver.mk g s ⟶ ToQuiver.mk g v)) ∨
+      IsLeastOfEdges g c {s | res[s] ≠ ⊤} (fun s hs ↦ res[s].untop hs) v d)
   h₃ : ∀ v : V, res[v] ≠ ⊤ →
-    g..IsDist' c {s | init[s] ≠ ⊤} (fun s hs ↦ init[s].untop hs) v res[v]
-  h₄ : ∀ v : V, (∃ s, init[s] ≠ ⊤ ∧ g..Reachable s v) ↔
-    v ∈ g..traversal {v | res[v] ≠ ⊤} {v | heap[v] ≠ ⊤}
+    IsDist' g c {s | init[s] ≠ ⊤} (fun s hs ↦ init[s].untop hs) v res[v]
+  h₄ : ∀ v : V, (∃ s, init[s] ≠ ⊤ ∧ Reachable g s v) ↔
+    v ∈ traversal g {v | res[v] ≠ ⊤} {v | heap[v] ≠ ⊤}
 
 lemma dijkstraStep_snd_getElem (g : G) (c : Info → CostType)
     [DecidableEq V] [AddCommMonoid CostType] [LinearOrder CostType]
@@ -448,7 +448,7 @@ lemma dijkstraStep_fst_getElem' (g : G) (c : Info → CostType)
     (dijkstraStep g c heap res hMinIdx).1[v] =
       if v = minIdx heap ∨ res[v] ≠ ⊤ then ⊤ else min heap[v]
         ((toMultiset g[minIdx heap]).filterMap fun e ↦
-          if g..snd e = v then some (heap[minIdx heap] + c e) else none).inf := by
+          if snd g e = v then some (heap[minIdx heap] + c e) else none).inf := by
   simp? [dijkstraStep, ← Multiset.filterMap_coe, getElem_setElem_eq_update, - getElem_setElem] says
     simp only [dijkstraStep, WithTop.coe_untop, getElem_setElem_eq_update, WithTop.coe_add,
       decreaseKeysD_getElem, toMultiset_list, ← Multiset.filterMap_coe, coe_toList, ne_eq]
@@ -485,8 +485,8 @@ lemma dijkstraStep_fst_getElem (g : G) (c : Info → CostType)
     (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) (v : V) :
     (dijkstraStep g c heap res hMinIdx).1[v] =
       if v = minIdx heap ∨ res[v] ≠ ⊤ then ⊤ else min heap[v] <|
-        (Finset.univ (α := g..toQuiver (minIdx heap) ⟶ g..toQuiver v)).inf
-          fun e ↦ heap[minIdx heap] + c (e : g..E).info := by
+        (Finset.univ (α := ToQuiver.mk g (minIdx heap) ⟶ ToQuiver.mk g v)).inf
+          fun e ↦ heap[minIdx heap] + c (e : E g).info := by
   rw [dijkstraStep_fst_getElem' (spec₁ := spec₁), ← Multiset.inf_dedup]
   congr!
   rw [Finset.inf_def]
@@ -500,7 +500,7 @@ lemma dijkstraStep_fst_getElem (g : G) (c : Info → CostType)
   · rintro ⟨x, hx, rfl, rfl, rfl⟩
     exact ⟨homOfStar x hx, rfl⟩
   · rintro ⟨⟨⟨v, x, hx⟩, ⟨fste, snde⟩⟩, rfl⟩
-    simp only [EmbeddingLike.apply_eq_iff_eq] at fste snde; subst fste snde
+    simp only [ToQuiver.mk.injEq] at fste snde; subst fste snde
     exact ⟨x, hx, rfl, rfl⟩
 
 lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
@@ -510,7 +510,7 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
     (heap : DistHeap) (res : DistArray) (hMinIdx : heap[minIdx heap] ≠ ⊤)
     (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) (v : V) :
     (dijkstraStep g c heap res hMinIdx).1[v] = ⊤ ↔
-      (heap[v] = ⊤ ∧ v ∉ g..succSet {minIdx heap}) ∨ v = minIdx heap ∨ res[v] ≠ ⊤ := by
+      (heap[v] = ⊤ ∧ v ∉ succSet g {minIdx heap}) ∨ v = minIdx heap ∨ res[v] ≠ ⊤ := by
   let +nondep : DecidableEq V := by classical infer_instance
   let +nondep : DecidableEq Info := by classical infer_instance
   dsimp
@@ -533,7 +533,7 @@ lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
     (heap : DistHeap) (res : DistArray) (hMinIdx : heap[minIdx heap] ≠ ⊤)
     (spec₁ : ∀ v : V, heap[v] = ⊤ ∨ res[v] = ⊤) :
     {v : V | (dijkstraStep g c heap res hMinIdx).1[v] ≠ ⊤} =
-      ({v : V | heap[v] ≠ ⊤} ∪ (g..succSet {minIdx heap})) \
+      ({v : V | heap[v] ≠ ⊤} ∪ (succSet g {minIdx heap})) \
         (insert (minIdx heap) {v : V | res[v] ≠ ⊤}) := by
   ext
   simp only [ne_eq, dijkstraStep_fst_getElem_eq_top (spec₁ := spec₁), mem_succSet_iff,
@@ -561,8 +561,8 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     rw [dijkstraStep_snd_getElem_eq_top] at resw
     specialize h₂ w resw.2
     obtain ⟨d, h₂⟩ := h₂
-    use min d <| (Finset.univ (α := g..toQuiver (minIdx heap) ⟶ g..toQuiver w)).inf
-      fun e ↦ heap[minIdx heap] + c (e : g..E).info
+    use min d <| (Finset.univ (α := ToQuiver.mk g (minIdx heap) ⟶ ToQuiver.mk g w)).inf
+      fun e ↦ heap[minIdx heap] + c (e : E g).info
     constructor; · rw [dijkstraStep_fst_getElem (spec₁ := h₁), if_neg (by tauto), h₂.1, min_assoc]
     replace h₂ := h₂.2
     rw [isLeastOfEdges_congr (dijkstraStep_snd_support _ _ _ _ _)]
@@ -618,7 +618,7 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
         · simp only [isLeastOfEdges_iff, WithTop.coe_untop, Set.mem_singleton_iff, exists_prop,
             exists_eq_left, ↓reduceIte, forall_eq]
           obtain ⟨e', -, he'⟩ := Finset.univ.exists_mem_eq_inf ⟨e, Finset.mem_univ _⟩
-            fun e ↦ heap[minIdx heap] + c (e : g..E).info
+            fun e ↦ heap[minIdx heap] + c (e : E g).info
           exact ⟨⟨e', he'.symm⟩, fun e ↦ Finset.inf_le (Finset.mem_univ _)⟩
   · intro w resw
     rw [ne_eq, dijkstraStep_snd_getElem_eq_top] at resw
@@ -645,11 +645,11 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
       · obtain ⟨d, hd, -⟩ := h₂ s hs
         apply le_add_right
         exact (getElem_minIdx_le heap s).trans <| hd.symm ▸ (min_le_left _ _)
-      have : ∀ (t : g..Quiver), res[(t : V)] = ⊤ → ∀ p : Quiver.Path (g..toQuiver s) t,
+      have : ∀ (t : ToQuiver g), res[(t : V)] = ⊤ → ∀ p : Quiver.Path (ToQuiver.mk g s) t,
         ∃ (v w : V), res[v] ≠ ⊤ ∧ res[w] = ⊤ ∧
-          ∃ (psv : Quiver.Path (g..toQuiver s) (g..toQuiver v))
-            (evw : g..toQuiver v ⟶ g..toQuiver w)
-            (pwt : Quiver.Path (g..toQuiver w) t),
+          ∃ (psv : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g v))
+            (evw : ToQuiver.mk g v ⟶ ToQuiver.mk g w)
+            (pwt : Quiver.Path (ToQuiver.mk g w) t),
               p = (psv.cons evw).comp pwt := by
         intro t ht p
         induction p with
@@ -691,7 +691,7 @@ noncomputable def unsettledSupport (g : G)
     [DefaultDict.ReadOnly DistHeap V (WithTop CostType) fun _ ↦ ⊤]
     [DefaultDict.ReadOnly DistArray V (WithTop CostType) fun _ ↦ ⊤]
     (heap : DistHeap) (res : DistArray) : Finset V := by
-  classical exact {v ∈ g..support ∪ (toDFinsupp' heap).support | res[v] = ⊤}
+  classical exact {v ∈ support g ∪ (toDFinsupp' heap).support | res[v] = ⊤}
 
 lemma unsettledSupport_dijkstraStep [DecidableEq V] (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
@@ -704,7 +704,7 @@ lemma unsettledSupport_dijkstraStep [DecidableEq V] (g : G) (c : Info → CostTy
     unsettledSupport g (dijkstraStep g c heap res hh).1 (dijkstraStep g c heap res hh).2 =
       (unsettledSupport g heap res).erase (minIdx heap) := by
   ext v
-  have hs : g..Adj (minIdx heap) v → v ∈ g..support := Adj.snd_mem_support
+  have hs : Adj g (minIdx heap) v → v ∈ support g := Adj.snd_mem_support
   simp only [unsettledSupport, Finset.mem_filter, Finset.mem_union, Finset.mem_erase,
     DFinsupp'.mem_support_toFun, coe_toDFinsupp'_eq_getElem, ne_eq,
     dijkstraStep_fst_getElem_eq_top (spec₁ := spec₁), dijkstraStep_snd_getElem_eq_top,
@@ -743,8 +743,8 @@ where
     if hh : heap[minIdx heap] = ⊤ then
       ⟨(heap, res), spec, hh⟩
     else
-      let hr := g..dijkstraStep c heap res hh
-      go hr.1 hr.2 (g..dijkstraStep_spec c init heap res spec hh)
+      let hr := dijkstraStep g c heap res hh
+      go hr.1 hr.2 (dijkstraStep_spec g c init heap res spec hh)
 termination_by unsettledSupport g heap res
 decreasing_by exact unsettledSupport_dijkstraStep_ssubset g c heap res hh spec.1
   spec_init : dijkstraStep.Spec g c init init default := by
@@ -764,19 +764,19 @@ lemma dijkstra_spec (g : G) (c : Info → CostType)
     (DistArray : Type*) [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
     {DistHeap : Type*} [Inhabited DistHeap] [IndexedMinHeap DistHeap V (WithTop CostType)]
     (init : DistHeap) (v : V) :
-    g..IsDist c {s | init[s] ≠ ⊤} (fun s hs ↦ init[s].untop hs) v
-      (g..dijkstra c DistArray init)[v] := by
+    IsDist g c {s | init[s] ≠ ⊤} (fun s hs ↦ init[s].untop hs) v
+      (dijkstra g c DistArray init)[v] := by
   rw [dijkstra]
   have spec := (dijkstra.go g c DistArray init init default
     (dijkstra.spec_init g c DistArray init)).prop
-  if hv : (g..dijkstra c DistArray init)[v] = ⊤ then
+  if hv : (dijkstra g c DistArray init)[v] = ⊤ then
     unfold dijkstra at hv
     rw [hv, isDist_top_iff]
     dsimp
     have := (spec.1.4 v).not
     push_neg at this
     rw [this]
-    have : v ∉ g..traversal {v | (dijkstra g c DistArray init)[v] ≠ ⊤} ∅ := by simpa [traversal]
+    have : v ∉ traversal g {v | (dijkstra g c DistArray init)[v] ≠ ⊤} ∅ := by simpa [traversal]
     convert this
     ext v
     simp only [ne_eq, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not]
