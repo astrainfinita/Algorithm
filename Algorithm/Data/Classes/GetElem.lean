@@ -7,7 +7,10 @@ module
 
 public import Algorithm.Tactic.Attr.Register
 public import Algorithm.Data.Classes.Erase
+public import Mathlib.Data.Nat.Notation
 public import Mathlib.Logic.Function.Basic
+
+import Mathlib.Tactic.SplitIfs
 
 @[expose] public section
 

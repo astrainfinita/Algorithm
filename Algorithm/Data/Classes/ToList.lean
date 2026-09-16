@@ -140,7 +140,7 @@ lemma front?_isSome {C α : Type*} [ToList C α] [Front C α] {c : C} (h : ¬isE
 @[simp]
 lemma front_def {C α : Type*} [ToList C α] [Front C α] (c : C) (h : ¬isEmpty c) :
     front c h = (front? c).get (front?_isSome h) :=
-  Option.some_injective _ (by simpa using (front_mem c h).symm)
+  Option.some.inj (by simpa using (front_mem c h).symm)
 
 class Back (C : Type*) (α : outParam Type*) [ToList C α] where
   back? : C → Option α
@@ -163,7 +163,7 @@ lemma back?_isSome [ToList C α] [Back C α] {c : C} (h : ¬isEmpty c) :
 @[simp]
 lemma back_def [ToList C α] [Back C α] (c : C) (h : ¬isEmpty c) :
     back c h = (back? c).get (back?_isSome h) :=
-  Option.some_injective _ (by simpa using (back_mem c h).symm)
+  Option.some.inj (by simpa using (back_mem c h).symm)
 
 class PopFront (C : Type*) (α : outParam Type*) [ToList C α] where
   popFront : C → C

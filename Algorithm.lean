@@ -1,4 +1,4 @@
-module
+module  -- shake: keep-all
 
 public import Algorithm.Algebra.BigOperators.DFinsupp'
 public import Algorithm.Data.Classes.Bag
