@@ -3,7 +3,11 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.ToMultiset
+module
+
+public import Algorithm.Data.Classes.ToMultiset
+
+@[expose] public section
 
 abbrev DecidableMem (α : Type*) (C : Type*) [Membership α C] :=
   ∀ (a : α) (c : C), Decidable (a ∈ c)

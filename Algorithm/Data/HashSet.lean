@@ -3,7 +3,11 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.Bag
+module
+
+public import Algorithm.Data.Classes.Bag
+
+@[expose] public section
 
 variable {α : Type*} [BEq α] [Hashable α]
 

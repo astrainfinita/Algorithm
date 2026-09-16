@@ -3,14 +3,18 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.ToList
-import Algorithm.Data.Classes.IndexedMinHeap
-import Algorithm.Data.Graph.AdjList
-import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+module
+
+public import Algorithm.Data.Classes.IndexedMinHeap
+public import Algorithm.Data.Graph.AdjList
+public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+public import Mathlib.Algebra.Order.Monoid.Unbundled.WithTop
+
 import Mathlib.Algebra.Order.Monoid.WithTop
-import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Set.Lattice
 import Mathlib.Tactic.Order
+
+@[expose] public section
 
 section -- should be in mathlb
 variable {γ : Type*}
@@ -720,7 +724,7 @@ lemma unsettledSupport_dijkstraStep_ssubset (g : G) (c : Info → CostType)
   simpa [unsettledSupport, DFinsupp'.mem_support_toFun, coe_toDFinsupp'_eq_getElem, hh]
     using (spec₁ _).resolve_left hh
 
-private local instance : WellFoundedRelation (Finset V) := ⟨(· < ·), wellFounded_lt⟩
+attribute [local instance] WellFoundedLT.toWellFoundedRelation
 
 def dijkstra (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]

@@ -3,12 +3,16 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.DFinsupp'.Defs
-import Mathlib.Data.Finset.Preimage
+module
+
+public import Algorithm.Data.DFinsupp'.Defs
+public import Mathlib.Data.Finset.Preimage
 
 /-!
 Modified from `Mathlib.Data.DFinsupp.Basic`
 -/
+
+@[expose] public section
 
 
 universe u u₁ u₂ v v₁ v₂ v₃ w x y l

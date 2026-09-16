@@ -3,11 +3,15 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.DefaultDict
-import Algorithm.Data.Classes.MinHeap
-import Algorithm.Data.Classes.ToList
-import Mathlib.Data.Finset.Lattice.Fold
-import Mathlib.Data.Prod.Lex
+module
+
+public import Algorithm.Data.Classes.DefaultDict
+public import Algorithm.Data.Classes.MinHeap
+public import Algorithm.Data.Classes.ToList
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Mathlib.Data.Prod.Lex
+
+@[expose] public section
 
 class IndexedMinHeap (C : Type*) [Inhabited C] (ι : outParam Type*)
     (α : outParam Type*) [Preorder α] [IsTotal α (· ≤ ·)] [OrderTop α] extends

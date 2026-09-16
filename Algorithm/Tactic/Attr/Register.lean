@@ -3,7 +3,13 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
+module
+
+public meta import Lean.Meta.Tactic.Simp.Attr
+
 import Lean.Meta.Tactic.Simp.RegisterCommand
+
+public meta section
 
 /-- The simpset `getElem_simps` is used by the tactic `get_elem_tactic_extensible`. -/
 register_simp_attr getElem_simps

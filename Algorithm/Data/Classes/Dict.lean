@@ -3,9 +3,12 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.Bag
-import Algorithm.Data.Classes.DefaultDict
-import Algorithm.Data.Classes.GetElem
+module
+
+public import Algorithm.Data.Classes.Bag
+public import Algorithm.Data.Classes.DefaultDict
+
+@[expose] public section
 
 variable {C ι α : Type*}
 

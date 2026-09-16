@@ -3,9 +3,12 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.ToList
-import Algorithm.Data.Forest
-import Algorithm.Data.Graph.AdjList
+module
+
+public import Algorithm.Data.Forest
+public import Algorithm.Data.Graph.AdjList
+
+@[expose] public section
 
 namespace AdjListClass
 variable

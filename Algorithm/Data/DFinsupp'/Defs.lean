@@ -3,11 +3,20 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
+module
+
+public import Mathlib.Data.Finset.Erase
+public import Mathlib.Data.Finset.Insert
+public import Mathlib.Data.Finset.Lattice.Basic
+public import Mathlib.Data.Fintype.Defs
+
 import Mathlib.Data.Set.Finite.Basic
 
 /-!
 Modified from `Mathlib.Data.DFinsupp.Basic`
 -/
+
+@[expose] public section
 
 
 universe u u₁ u₂ v v₁ v₂ v₃ w x y l
