@@ -72,8 +72,8 @@ in that case it suffices to decrease the worklist measure. -/
 private lemma dfs_visit_decreases (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
     (visited : BoolArray) (v : V) (hv : visited[v] = false)
-    {m n : ℕ} (h : g..succList v = [] → m < n) :
-    Prod.Lex (· < ·) (· < ·)
+    {α : Type*} {r : α → α → Prop} {m n : α} (h : g..succList v = [] → r m n) :
+    Prod.Lex (· < ·) r
       (unvisitedSupport g visited[v ↦ true], m)
       (unvisitedSupport g visited, n) := by
   by_cases hvs : v ∈ g..support
@@ -99,13 +99,13 @@ def dfsForest' (g : G)
       let (fc, ⟨vis₁, h₁⟩) := g..dfsForest' (g..succList v) visited[v ↦ true]
       let (fs, ⟨vis₂, h₂⟩) := g..dfsForest' vs vis₁
       (Forest.node v fc fs, ⟨vis₂, (h.trans h₁).trans h₂⟩)
-termination_by (unvisitedSupport g visited, vs.length)
+termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
   · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
     intro hnil
-    simp [hnil]
+    cases vs <;> simp +arith [hnil]
   · simpa [Prod.lex_iff] using
       lt_or_eq_of_le (α := Finset V) (unvisitedSupport_antitone g (h.trans h₁))
 
@@ -216,13 +216,13 @@ def dfs' (g : G) {BoolArray : Type*} [Inhabited BoolArray]
       let ⟨vis₁, h₁, hvis₁⟩ := g..dfs' (g..succList v) visited[v ↦ true]
       let ⟨vis₂, h₂, hvis₂⟩ := g..dfs' vs vis₁
       ⟨vis₂, (h.trans h₁).trans h₂, by rw [hvis₂, hvis₁, dfsForest']; simp [hv]⟩
-termination_by (unvisitedSupport g visited, vs.length)
+termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
   · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
     intro hnil
-    simp [hnil]
+    cases vs <;> simp +arith [hnil]
   · simpa [Prod.lex_iff] using
       lt_or_eq_of_le (α := Finset V) (unvisitedSupport_antitone g (h.trans h₁))
 
@@ -261,17 +261,14 @@ def dfsForestTR (g : G)
       g..dfsForestTR ((f, vs) :: vss) visited
     else
       g..dfsForestTR ((.nil, g..succList v) :: (f, vs) :: vss) visited[v ↦ true]
-termination_by
-  (unvisitedSupport g visited, 2 * (vs.map (·.snd.length)).sum + vs.length)
+termination_by (unvisitedSupport g visited, vs.flatMap Prod.snd)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
-    omega
   · simp [Prod.lex_iff]
   · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
     intro hnil
     simp [hnil]
-    omega
 
 def dfs'TR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
@@ -285,16 +282,14 @@ def dfs'TR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
       g..dfs'TR (vs :: vss) visited
     else
       g..dfs'TR (g..succList v :: (vs :: vss)) visited[v ↦ true]
-termination_by
-  (unvisitedSupport g visited, 2 * (vs.map List.length).sum + vs.length)
+termination_by (unvisitedSupport g visited, vs.flatten, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
   · simp [Prod.lex_iff]
   · apply dfs_visit_decreases g visited v (by simpa using ‹¬visited[v] = true›)
     intro hnil
-    simp [hnil]
-    omega
+    simp [hnil, Prod.lex_iff]
 
 def dfsTR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
@@ -307,7 +302,7 @@ def dfsTR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
       g..dfsTR vs visited
     else
       g..dfsTR (g..succList v ++ vs) visited[v ↦ true]
-termination_by (unvisitedSupport g visited, vs.length)
+termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   all_goals simp_wf
   · simp [Prod.lex_iff]
