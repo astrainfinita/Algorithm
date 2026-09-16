@@ -3,9 +3,13 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.ToMultiset
-import Mathlib.Data.Multiset.Lattice
-import Mathlib.Order.WithBot
+module
+
+public import Algorithm.Data.Classes.ToMultiset
+public import Mathlib.Data.Multiset.Lattice
+public import Mathlib.Order.WithBot
+
+@[expose] public section
 
 namespace Multiset -- should be in mathlb
 variable {α : Type*} [SemilatticeInf α] [OrderTop α]

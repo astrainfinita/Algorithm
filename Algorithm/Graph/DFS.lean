@@ -3,8 +3,11 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Graph.AdjList
-import Algorithm.Data.Graph.IsDFSForest
+module
+
+public import Algorithm.Data.Graph.IsDFSForest
+
+@[expose] public section
 
 namespace AdjListClass
 variable {V : Type*} {Info : Type*}
@@ -13,7 +16,7 @@ variable {V : Type*} {Info : Type*}
   {StarColl : Type*} [DefaultDict.ReadOnly StarColl V EColl fun _ ↦ ∅]
   {G : Type*} [AdjListClass G V Info EColl StarColl]
 
-private local instance : WellFoundedRelation (Finset V) := ⟨(· < ·), wellFounded_lt⟩
+attribute [local instance] WellFoundedLT.toWellFoundedRelation
 
 /-- Vertices incident to an edge that have not yet been visited. -/
 noncomputable def unvisitedSupport (g : G) {BoolArray : Type*}

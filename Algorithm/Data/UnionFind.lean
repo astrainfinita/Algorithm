@@ -3,9 +3,12 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.GetElem
-import Mathlib.Data.Set.Card
-import Mathlib.Data.Setoid.Basic
+module
+
+public import Algorithm.Data.Classes.GetElem
+public import Mathlib.Data.Set.Card
+
+@[expose] public section
 
 namespace UnionFindImpl
 

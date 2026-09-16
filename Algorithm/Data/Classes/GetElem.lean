@@ -3,9 +3,13 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Tactic.Attr.Register
-import Algorithm.Data.Classes.Erase
-import Mathlib.Logic.Function.Basic
+module
+
+public import Algorithm.Tactic.Attr.Register
+public import Algorithm.Data.Classes.Erase
+public import Mathlib.Logic.Function.Basic
+
+@[expose] public section
 
 variable {C ι α : Type*} {Valid : C → ι → Prop}
 
@@ -18,7 +22,7 @@ macro:max c:term noWs "[" i:term " ↦ " v:term "]" : term => `(SetElem.setElem 
 open Lean PrettyPrinter.Delaborator SubExpr in
 /-- Delaborator for `SetElem.setElem` -/
 @[app_delab SetElem.setElem]
-def SetElem.delabSetElem : Delab := do
+meta def SetElem.delabSetElem : Delab := do
   guard <| (← getExpr).isAppOfArity' ``SetElem.setElem 7
   let c ← withNaryArg 4 delab
   let i ← withNaryArg 5 delab
@@ -151,7 +155,14 @@ export GetElemAllValid (all_valid)
 
 attribute [simp] all_valid
 
-macro_rules | `(tactic| get_elem_tactic_extensible) => `(tactic| exact GetElemAllValid.all_valid)
+/-- Extending `get_elem_tactic` with `all_valid` still abstracts its proof in public statements,
+hiding compound collection/index expressions from `rw`. Keep `all_valid` unabstracted;
+the fallback retains normal proof abstraction, allowing private helper lemmas. -/
+macro_rules
+  | `($c[$i]) => `(getElem $c $i (set_option backward.proofsInPublic true in by first
+    | done
+    | exact GetElemAllValid.all_valid
+    | exact set_option backward.proofsInPublic false in by get_elem_tactic))
 
 class GetSetElemAllValid (C : Type*) (ι : Type*) (α : outParam Type*) extends
     GetElemAllValid C ι α, SetElem C ι α where

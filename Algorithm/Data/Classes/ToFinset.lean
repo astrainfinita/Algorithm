@@ -3,8 +3,12 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.ToMultiset
-import Mathlib.Data.Finset.Card
+module
+
+public import Algorithm.Data.Classes.ToMultiset
+public import Mathlib.Data.Finset.Card
+
+@[expose] public section
 
 variable {C α : Type*}
 

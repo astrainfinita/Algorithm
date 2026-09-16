@@ -3,10 +3,15 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.MinHeap
-import Batteries.Data.PairingHeap
+module
+
+public import Algorithm.Data.Classes.MinHeap
+public import Batteries.Data.PairingHeap
+
 import Mathlib.Algebra.Order.Group.Multiset
 import Mathlib.Tactic.Abel
+
+@[expose] public section
 
 namespace Batteries
 

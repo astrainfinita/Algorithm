@@ -3,12 +3,16 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.DFinsupp'.Defs
-import Mathlib.Data.Fintype.Pi
+module
+
+public import Algorithm.Data.DFinsupp'.Defs
+public import Mathlib.Data.Fintype.Pi
 
 /-!
 Modified from `Mathlib.Data.DFinsupp.Basic`
 -/
+
+@[expose] public section
 
 instance DFinsupp'.fintype {ι : Type*} {π : ι → Type*} [DecidableEq ι] {dπ : ∀ i, π i}
     [Fintype ι] [∀ i, Fintype (π i)] : Fintype (Π₀' i, [π i, dπ i]) :=

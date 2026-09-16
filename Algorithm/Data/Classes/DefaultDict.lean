@@ -3,9 +3,14 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.GetElem
-import Algorithm.Data.DFinsupp'.Defs
-import Mathlib.Data.Setoid.Basic
+module
+
+public import Algorithm.Data.Classes.GetElem
+public import Algorithm.Data.DFinsupp'.Defs
+public import Mathlib.Data.Fintype.Basic
+public import Mathlib.Data.Setoid.Basic
+
+@[expose] public section
 
 namespace Vector
 variable {α : Type*} {n : ℕ}

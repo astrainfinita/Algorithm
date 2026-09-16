@@ -7,7 +7,6 @@ require "leanprover-community" / "mathlib" @ git "v4.27.0-rc1"
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
   ⟨`linter.style.longFile, .ofNat 1500⟩,
-  -- `latest_import.yml` uses this comment: if you edit it, make sure that the workflow still works
 ]
 
 abbrev algorithmLeanOptions := #[

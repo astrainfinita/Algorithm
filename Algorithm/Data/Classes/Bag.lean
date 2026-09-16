@@ -3,8 +3,12 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.MultiBag
-import Algorithm.Data.Classes.ToFinset
+module
+
+public import Algorithm.Data.Classes.MultiBag
+public import Algorithm.Data.Classes.ToFinset
+
+@[expose] public section
 
 class Bag.ReadOnly (C : Type*) (α : outParam Type*) extends
     ToFinset C α where

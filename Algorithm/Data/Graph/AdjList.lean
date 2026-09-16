@@ -3,11 +3,15 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.DefaultDict
-import Algorithm.Data.Classes.ToList
+module
+
+public import Algorithm.Data.Classes.DefaultDict
+public import Algorithm.Data.Classes.ToList
 -- import Mathlib.Data.List.Nodup
-import Mathlib.Combinatorics.Quiver.Path
-import Mathlib.Data.Finset.Union
+public import Mathlib.Combinatorics.Quiver.Path
+public import Mathlib.Data.Finset.Union
+
+@[expose] public section
 
 structure AdjList
     (V : Type*) (Info : Type*)

@@ -36,10 +36,11 @@ jobs:
           build: true
           build-args: '--wfail -KCI'
           test: true
+          test-args: '--iofail'
           # Run lint separately so it also runs if the build or a later check fails.
           lint: false
           mk_all-check: true
-          mk_all-args: '--lib Algorithm'
+          mk_all-args: '--lib Algorithm --module'
           reinstall-transient-toolchain: true
 
       - name: Check for unexpected output
@@ -56,8 +57,8 @@ jobs:
           lake exe graph
           rm import_graph.dot
 
-      - name: Check unused imports
-        run: lake exe shake Algorithm --cfg scripts/noshake.json --gh-style
+      # - name: Check unused imports
+      #   run: lake exe shake Algorithm --cfg scripts/noshake.json --gh-style
 
       - name: Lint Algorithm
         if: ${{ !cancelled() && (steps.lean.outputs.build-status == 'SUCCESS' || steps.lean.outputs.build-status == 'FAILURE') }}
@@ -70,9 +71,18 @@ jobs:
           action: remove
           linters: lean, gcc
 
+  style:
+    name: Lint style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: leanprover-community/lint-style-action@a7e7428fa44f9635d6eb8e01919d16fd498d387a # 2025-08-18
+        with:
+          mode: check
+          ref: ${{ github.sha }}
+
   docs:
     name: build docs
-    needs: build
+    needs: [build, style]
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     env:

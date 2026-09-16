@@ -3,7 +3,13 @@ Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
+module
+
+public import Mathlib.Data.Set.Defs
+
 import Mathlib.Data.Set.Insert
+
+@[expose] public section
 
 inductive Forest (α : Type*)
   | nil : Forest α

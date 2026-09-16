@@ -3,8 +3,12 @@ Copyright (c) 2023 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yuyang Zhao
 -/
-import Algorithm.Data.Classes.Erase
-import Mathlib.Data.Multiset.AddSub
+module
+
+public import Algorithm.Data.Classes.Erase
+public import Mathlib.Data.Multiset.AddSub
+
+@[expose] public section
 
 variable {C α : Type*}
 

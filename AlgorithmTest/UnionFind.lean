@@ -1,3 +1,5 @@
+module
+
 import Algorithm.Data.UnionFind
 
 abbrev UF := UnionFind (Fin 10) (Vector (Fin 10) 10) (Vector Nat 10)
