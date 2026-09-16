@@ -22,7 +22,7 @@ attribute [local instance] WellFoundedLT.toWellFoundedRelation
 noncomputable def unvisitedSupport (g : G) {BoolArray : Type*}
     [DefaultDict.ReadOnly BoolArray V Bool fun _ ↦ false]
     (visited : BoolArray) : Finset V :=
-  {v ∈ g..support | ¬visited[v]}
+  {v ∈ support g | ¬visited[v]}
 
 lemma unvisitedSupport_set_true [DecidableEq V] (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
@@ -36,7 +36,7 @@ lemma unvisitedSupport_set_true [DecidableEq V] (g : G) {BoolArray : Type*}
 
 lemma unvisitedSupport_set_true_ssubset (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
-    (visited : BoolArray) (v : V) (hvs : v ∈ g..support) (hv : ¬visited[v]) :
+    (visited : BoolArray) (v : V) (hvs : v ∈ support g) (hv : ¬visited[v]) :
     unvisitedSupport g visited[v ↦ true] ⊂ unvisitedSupport g visited := by
   classical
   rw [unvisitedSupport_set_true]
@@ -44,7 +44,7 @@ lemma unvisitedSupport_set_true_ssubset (g : G) {BoolArray : Type*}
 
 lemma unvisitedSupport_set_true_of_notMem (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
-    (visited : BoolArray) {v : V} (hv : v ∉ g..support) :
+    (visited : BoolArray) {v : V} (hv : v ∉ support g) :
     unvisitedSupport g visited[v ↦ true] = unvisitedSupport g visited := by
   classical
   rw [unvisitedSupport_set_true]
@@ -75,14 +75,14 @@ in that case it suffices to decrease the worklist measure. -/
 private lemma dfs_visit_decreases (g : G) {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
     (visited : BoolArray) (v : V) (hv : ¬visited[v])
-    {α : Type*} {r : α → α → Prop} {m n : α} (h : g..succList v = [] → r m n) :
+    {α : Type*} {r : α → α → Prop} {m n : α} (h : succList g v = [] → r m n) :
     Prod.Lex (· < ·) r
       (unvisitedSupport g visited[v ↦ true], m)
       (unvisitedSupport g visited, n) := by
-  by_cases hvs : v ∈ g..support
+  by_cases hvs : v ∈ support g
   · exact Prod.Lex.left _ _ (unvisitedSupport_set_true_ssubset g visited v hvs hv)
   · rw [unvisitedSupport_set_true_of_notMem g visited hvs]
-    exact Prod.Lex.right _ (h (g..succList_eq_nil_of_notMem_support hvs))
+    exact Prod.Lex.right _ (h (succList_eq_nil_of_notMem_support g hvs))
 
 -- 也许在以后可以改成存迭代器
 -- 如何形式化各种使用 dfs 的算法？如 Tarjan's SCC
@@ -96,11 +96,11 @@ def dfsForest' (g : G)
   | [] => (.nil, ⟨visited, subset_rfl⟩)
   | v :: vs =>
     if visited[v] then
-      g..dfsForest' vs visited
+      dfsForest' g vs visited
     else
       have h : {w : V | visited[w]} ⊆ {w : V | visited[v ↦ true][w]} := by simp
-      let (fc, ⟨vis₁, h₁⟩) := g..dfsForest' (g..succList v) visited[v ↦ true]
-      let (fs, ⟨vis₂, h₂⟩) := g..dfsForest' vs vis₁
+      let (fc, ⟨vis₁, h₁⟩) := dfsForest' g (succList g v) visited[v ↦ true]
+      let (fs, ⟨vis₂, h₂⟩) := dfsForest' g vs vis₁
       (Forest.node v fc fs, ⟨vis₂, (h.trans h₁).trans h₂⟩)
 termination_by (unvisitedSupport g visited, vs)
 decreasing_by
@@ -115,59 +115,59 @@ lemma roots_dfsForest'_fst_subset (g : G)
     {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
-    (g..dfsForest' vs visited).1.roots ⊆ {v | v ∈ vs} := by
+    (dfsForest' g vs visited).1.roots ⊆ {v | v ∈ vs} := by
   match vs with
   | [] => unfold dfsForest'; exact Set.empty_subset _
   | v :: vs =>
     unfold dfsForest'; split
     · intro _ h
-      simpa using .inr (g..roots_dfsForest'_fst_subset vs visited h)
+      simpa using .inr (roots_dfsForest'_fst_subset g vs visited h)
     dsimp
     rintro _ (rfl | h)
     · simp
     · simp only [List.mem_cons]
-      exact .inr <| g..roots_dfsForest'_fst_subset vs _ h
+      exact .inr <| roots_dfsForest'_fst_subset g vs _ h
 
 lemma subset_visited_dfsForest'_snd (g : G)
     {BoolArray : Type*}
     [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
-    {v | v ∈ vs} ⊆ {v : V | (g..dfsForest' vs visited).2.val[v]} := by
+    {v | v ∈ vs} ⊆ {v : V | (dfsForest' g vs visited).2.val[v]} := by
   match vs with
   | [] => simp
   | v :: vs =>
     simp only [List.mem_cons]
     unfold dfsForest'; split
     · rintro _ (rfl | h)
-      · apply (g..dfsForest' vs visited).2.prop
+      · apply (dfsForest' g vs visited).2.prop
         simpa
-      · exact g..subset_visited_dfsForest'_snd vs visited h
+      · exact subset_visited_dfsForest'_snd g vs visited h
     · dsimp
       rintro _ (rfl | h)
-      · apply (g..dfsForest' _ _).2.prop
-        apply (g..dfsForest' _ _).2.prop
+      · apply (dfsForest' g _ _).2.prop
+        apply (dfsForest' g _ _).2.prop
         simp
-      · exact g..subset_visited_dfsForest'_snd vs _ h
+      · exact subset_visited_dfsForest'_snd g vs _ h
 
 lemma isDFSForest_dfsForest' (g : G)
     {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
-    g..IsDFSForest
+    IsDFSForest g
       {v : V | visited[v]}
-      {v : V | (g..dfsForest' vs visited).2.val[v]}
-      (g..dfsForest' vs visited).1 := by
+      {v : V | (dfsForest' g vs visited).2.val[v]}
+      (dfsForest' g vs visited).1 := by
   induction vs, visited using dfsForest'.induct g (BoolArray := BoolArray) with
   | case1 => unfold dfsForest'; constructor
   | case2 _ _ _ h ih => rwa [dfsForest', if_pos h]
   | case3 visited v vs hv _ _ _ _ hc _ _ _ _ ih₁ ih₂ =>
     rw [dfsForest', if_neg hv]
-    let rc := g..dfsForest' (g..succList v) visited[v ↦ true]
+    let rc := dfsForest' g (succList g v) visited[v ↦ true]
     dsimp; apply IsDFSForest.node {v : V | rc.2.val[v]}
     · simp [hv]
     · simpa using ih₁
-    · exact g..succList_eq_succSet _ ▸ (g..roots_dfsForest'_fst_subset _ _)
-    · exact g..succList_eq_succSet _ ▸ (g..subset_visited_dfsForest'_snd _ _)
+    · exact succList_eq_succSet g _ ▸ (roots_dfsForest'_fst_subset g _ _)
+    · exact succList_eq_succSet g _ ▸ (subset_visited_dfsForest'_snd g _ _)
     · have hrc := congrArg (fun r ↦ r.2.val) hc
       cases hrc
       exact ih₂
@@ -177,29 +177,29 @@ def dfsForest (g : G)
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
     Forest V × BoolArray :=
-  (g..dfsForest' vs visited).map id Subtype.val
+  (dfsForest' g vs visited).map id Subtype.val
 
 lemma dfsForest_spec' (g : G)
     (BoolArray : Type*) [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false] (vs : List V) :
-    let (f, vis) := (g..dfsForest vs (default : BoolArray))
+    let (f, vis) := (dfsForest g vs (default : BoolArray))
     (f.support = {v : V | vis[v]}) ∧
-      ∀ v, v ∈ f.support ↔ ∃ r ∈ vs, g..Reachable r v := by
-  have := g..isDFSForest_dfsForest' vs (default : BoolArray)
+      ∀ v, v ∈ f.support ↔ ∃ r ∈ vs, Reachable g r v := by
+  have := isDFSForest_dfsForest' g vs (default : BoolArray)
   simp only [DefaultDict.getElem_default, Bool.false_eq_true, Set.setOf_false] at this
   dsimp
   refine ⟨this.spec.1,
     fun v ↦ ⟨fun hv ↦ ?_, fun ⟨r, hr, hrv⟩ ↦ this.complete v r ?_ hrv⟩⟩
   · obtain ⟨r, hr, hrv⟩ := this.sound v hv
-    exact ⟨r, g..roots_dfsForest'_fst_subset vs _ hr, hrv⟩
-  · exact this.spec.1 ▸ g..subset_visited_dfsForest'_snd vs default hr
+    exact ⟨r, roots_dfsForest'_fst_subset g vs _ hr, hrv⟩
+  · exact this.spec.1 ▸ subset_visited_dfsForest'_snd g vs default hr
 
 lemma dfsForest_spec (g : G)
     (BoolArray : Type*) [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false] (vs : List V) :
-    let (f, vis) := (g..dfsForest vs (default : BoolArray))
-    f.support = {v : V | vis[v]} ∧ ∀ v : V, vis[v] ↔ ∃ r ∈ vs, g..Reachable r v := by
-  have h := g..dfsForest_spec' BoolArray vs
+    let (f, vis) := (dfsForest g vs (default : BoolArray))
+    f.support = {v : V | vis[v]} ∧ ∀ v : V, vis[v] ↔ ∃ r ∈ vs, Reachable g r v := by
+  have h := dfsForest_spec' g BoolArray vs
   exact ⟨h.1, fun v ↦ by simpa only [h.1, Set.mem_setOf_eq] using h.2 v⟩
 
 def dfs' (g : G) {BoolArray : Type*} [Inhabited BoolArray]
@@ -211,12 +211,12 @@ def dfs' (g : G) {BoolArray : Type*} [Inhabited BoolArray]
   | [] => ⟨visited, subset_rfl, by unfold dfsForest'; rfl⟩
   | v :: vs =>
     if hv : visited[v] then
-      let ⟨vis, h, hvis⟩ := g..dfs' vs visited
+      let ⟨vis, h, hvis⟩ := dfs' g vs visited
       ⟨vis, h, by rw [hvis, dfsForest']; simp [hv]⟩
     else
       have h : {w : V | visited[w]} ⊆ {w : V | visited[v ↦ true][w]} := by simp
-      let ⟨vis₁, h₁, hvis₁⟩ := g..dfs' (g..succList v) visited[v ↦ true]
-      let ⟨vis₂, h₂, hvis₂⟩ := g..dfs' vs vis₁
+      let ⟨vis₁, h₁, hvis₁⟩ := dfs' g (succList g v) visited[v ↦ true]
+      let ⟨vis₂, h₂, hvis₂⟩ := dfs' g vs vis₁
       ⟨vis₂, (h.trans h₁).trans h₂, by rw [hvis₂, hvis₁, dfsForest']; simp [hv]⟩
 termination_by (unvisitedSupport g visited, vs)
 decreasing_by
@@ -231,21 +231,21 @@ def dfs (g : G) {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
     BoolArray :=
-  (g..dfs' vs visited).val
+  (dfs' g vs visited).val
 
 @[simp]
 lemma dfsForest_snd (g : G)
     {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
-    (g..dfsForest vs visited).snd = g..dfs vs visited :=
-  (g..dfs' vs visited).prop.2.symm
+    (dfsForest g vs visited).snd = dfs g vs visited :=
+  (dfs' g vs visited).prop.2.symm
 
 lemma dfs_spec (g : G)
     (BoolArray : Type*) [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false] (vs : List V) :
-    ∀ v : V, (g..dfs vs (default : BoolArray))[v] ↔ ∃ r ∈ vs, g..Reachable r v :=
-  g..dfsForest_snd vs (default : BoolArray) ▸ (g..dfsForest_spec BoolArray vs).2
+    ∀ v : V, (dfs g vs (default : BoolArray))[v] ↔ ∃ r ∈ vs, Reachable g r v :=
+  dfsForest_snd g vs (default : BoolArray) ▸ (dfsForest_spec g BoolArray vs).2
 
 def dfsForestTR (g : G)
     {BoolArray : Type*} [Inhabited BoolArray]
@@ -256,12 +256,12 @@ def dfsForestTR (g : G)
   | [] => (.nil, default)
   | [(f, [])] => (f, visited)
   | (_, []) :: (_, []) :: _ => (.nil, default)
-  | (f, []) :: (fs, v :: vs) :: vss => g..dfsForestTR ((Forest.node v f fs, vs) :: vss) visited
+  | (f, []) :: (fs, v :: vs) :: vss => dfsForestTR g ((Forest.node v f fs, vs) :: vss) visited
   | (f, v :: vs) :: vss =>
     if visited[v] then
-      g..dfsForestTR ((f, vs) :: vss) visited
+      dfsForestTR g ((f, vs) :: vss) visited
     else
-      g..dfsForestTR ((.nil, g..succList v) :: (f, vs) :: vss) visited[v ↦ true]
+      dfsForestTR g ((.nil, succList g v) :: (f, vs) :: vss) visited[v ↦ true]
 termination_by (unvisitedSupport g visited, vs.flatMap Prod.snd)
 decreasing_by
   · simp [Prod.lex_iff]
@@ -276,12 +276,12 @@ def dfs'TR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
     BoolArray :=
   match vs with
   | [] => visited
-  | [] :: vss => g..dfs'TR vss visited
+  | [] :: vss => dfs'TR g vss visited
   | (v :: vs) :: vss =>
     if visited[v] then
-      g..dfs'TR (vs :: vss) visited
+      dfs'TR g (vs :: vss) visited
     else
-      g..dfs'TR (g..succList v :: (vs :: vss)) visited[v ↦ true]
+      dfs'TR g (succList g v :: (vs :: vss)) visited[v ↦ true]
 termination_by (unvisitedSupport g visited, vs.flatten, vs)
 decreasing_by
   · simp [Prod.lex_iff]
@@ -298,9 +298,9 @@ def dfsTR (g : G) {BoolArray : Type*} [Inhabited BoolArray]
   | [] => visited
   | v :: vs =>
     if visited[v] then
-      g..dfsTR vs visited
+      dfsTR g vs visited
     else
-      g..dfsTR (g..succList v ++ vs) visited[v ↦ true]
+      dfsTR g (succList g v ++ vs) visited[v ↦ true]
 termination_by (unvisitedSupport g visited, vs)
 decreasing_by
   · simp [Prod.lex_iff]
@@ -311,8 +311,8 @@ decreasing_by
 lemma dfsTR_spec' (g : G)
     {BoolArray : Type*} [Inhabited BoolArray] [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) (visited : BoolArray) :
-    g..traversal {v : V | visited[v]} {v | v ∈ vs ∧ ¬visited[v]} =
-      g..traversal {v : V | (g..dfsTR vs visited)[v]} ∅ := by
+    traversal g {v : V | visited[v]} {v | v ∈ vs ∧ ¬visited[v]} =
+      traversal g {v : V | (dfsTR g vs visited)[v]} ∅ := by
   induction vs, visited using dfsTR.induct g (BoolArray := BoolArray) with
   | case1 => simp [dfsTR]
   | case2 _ v _ hv ih =>
@@ -336,7 +336,7 @@ lemma dfsTR_spec (g : G)
     (BoolArray : Type*) [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
     (vs : List V) :
-    g..traversal ∅ {v | v ∈ vs} = {v : V | (g..dfsTR vs (default : BoolArray))[v]} := by
-  simpa using g..dfsTR_spec' vs (default : BoolArray)
+    traversal g ∅ {v | v ∈ vs} = {v : V | (dfsTR g vs (default : BoolArray))[v]} := by
+  simpa using dfsTR_spec' g vs (default : BoolArray)
 
 end AdjListClass

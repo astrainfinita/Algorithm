@@ -25,21 +25,21 @@ inductive IsDFSForest : Set V → Set V → Forest V → Prop
     (m : Set V)
     (hv : v ∉ i)
     (hc : IsDFSForest (insert v i) m c)
-    (roots_subset_succ : c.roots ⊆ g..succSet {v})
-    (succ_marked : g..succSet {v} ⊆ m)
+    (roots_subset_succ : c.roots ⊆ succSet g {v})
+    (succ_marked : succSet g {v} ⊆ m)
     (hs : IsDFSForest m o s) : IsDFSForest i o (.node v c s)
 
 namespace IsDFSForest
 variable {i m o : Set V} {f f₁ f₂ : Forest V}
 
-lemma append (hf₁ : g..IsDFSForest i m f₁) (hf₂ : g..IsDFSForest m o f₂) :
-    g..IsDFSForest i o (f₁ ++ f₂) := by
+lemma append (hf₁ : IsDFSForest g i m f₁) (hf₂ : IsDFSForest g m o f₂) :
+    IsDFSForest g i o (f₁ ++ f₂) := by
   induction hf₁ with
   | nil _ => exact hf₂
   | node m₁ hv hc roots_subset_succ succ_marked _ _ ihs =>
     exact node m₁ hv hc roots_subset_succ succ_marked (ihs hf₂)
 
-lemma union (hf : g..IsDFSForest i o f) : i ∪ f.support = o := by
+lemma union (hf : IsDFSForest g i o f) : i ∪ f.support = o := by
   induction hf with
   | nil i => exact Set.union_empty _
   | node _ _ _ _ _ _ ihc ihs =>
@@ -47,13 +47,13 @@ lemma union (hf : g..IsDFSForest i o f) : i ∪ f.support = o := by
     rw [Set.union_insert, ← Set.insert_union,
       ← Set.union_assoc, ihc, ihs]
 
-lemma subset (hf : g..IsDFSForest i o f) : i ⊆ o :=
+lemma subset (hf : IsDFSForest g i o f) : i ⊆ o :=
   hf.union ▸ Set.subset_union_left
 
-lemma support_subset (hf : g..IsDFSForest i o f) : f.support ⊆ o :=
+lemma support_subset (hf : IsDFSForest g i o f) : f.support ⊆ o :=
   hf.union ▸ Set.subset_union_right
 
-lemma inter (hf : g..IsDFSForest i o f) : i ∩ f.support = ∅ := by
+lemma inter (hf : IsDFSForest g i o f) : i ∩ f.support = ∅ := by
   induction hf with
   | nil _ => exact Set.inter_empty _
   | node _ hv hc _ _ _ ihc ihs =>
@@ -65,8 +65,8 @@ lemma inter (hf : g..IsDFSForest i o f) : i ∩ f.support = ∅ := by
     exact ⟨(Set.inter_subset_inter_left _ (Set.subset_insert _ _)).trans ihc,
       (Set.inter_subset_inter_left _ ((Set.subset_insert _ _).trans hc.subset)).trans ihs⟩
 
-lemma sound (hf : g..IsDFSForest i o f) :
-    ∀ v ∈ f.support, ∃ r ∈ f.roots, g..Reachable r v := by
+lemma sound (hf : IsDFSForest g i o f) :
+    ∀ v ∈ f.support, ∃ r ∈ f.roots, Reachable g r v := by
   induction hf with
   | nil _ => nofun
   | node _ hv hc roots_subset_succ _ _ ihc ihs =>
@@ -79,8 +79,8 @@ lemma sound (hf : g..IsDFSForest i o f) :
     · obtain ⟨r, hr, hrw⟩ := ihs w hw
       exact ⟨r, .inr hr, hrw⟩
 
-lemma succSet_support_subset (hf : g..IsDFSForest i o f) :
-    g..succSet f.support ⊆ o := by
+lemma succSet_support_subset (hf : IsDFSForest g i o f) :
+    succSet g f.support ⊆ o := by
   induction hf with
   | nil _ => nofun
   | node _ hv hc _ succ_marked hs ihc ihs =>
@@ -95,8 +95,8 @@ lemma succSet_support_subset (hf : g..IsDFSForest i o f) :
     · apply ihs
       simpa using ⟨r, hr, hrw⟩
 
-lemma succSet_subset' (hf : g..IsDFSForest i o f) (h : g..succSet i ⊆ o) :
-    g..succSet o ⊆ o := by
+lemma succSet_subset' (hf : IsDFSForest g i o f) (h : succSet g i ⊆ o) :
+    succSet g o ⊆ o := by
   conv_lhs => rw [← hf.union]
   simpa using ⟨h, hf.succSet_support_subset⟩
 
@@ -104,21 +104,21 @@ lemma succSet_subset' (hf : g..IsDFSForest i o f) (h : g..succSet i ⊆ o) :
 --     g.succSet o ⊆ o :=
 --   hf.succSet_subset' (h.trans hf.subset)
 
-lemma complete' (hf : g..IsDFSForest i o f) (h : g..succSet i ⊆ o) :
-    ∀ v, ∀ r ∈ f.support, g..Reachable r v → v ∈ o := by
+lemma complete' (hf : IsDFSForest g i o f) (h : succSet g i ⊆ o) :
+    ∀ v, ∀ r ∈ f.support, Reachable g r v → v ∈ o := by
   intro v r hr h
-  rw [g..reachable_eq_reflTransGen] at h
+  rw [reachable_eq_reflTransGen g] at h
   induction h with
   | refl => exact hf.support_subset hr
   | tail _ e ih => exact hf.succSet_subset' h ⟨_, ih, e⟩
 
-lemma complete (hf : g..IsDFSForest ∅ o f) :
-    ∀ v, ∀ r ∈ f.support, g..Reachable r v → v ∈ f.support := by
+lemma complete (hf : IsDFSForest g ∅ o f) :
+    ∀ v, ∀ r ∈ f.support, Reachable g r v → v ∈ f.support := by
   convert hf.complete' (by simp)
   simp [← hf.union]
 
-lemma spec (hf : g..IsDFSForest ∅ o f) :
-    f.support = o ∧ ∀ v, v ∈ f.support ↔ ∃ r ∈ f.roots, g..Reachable r v :=
+lemma spec (hf : IsDFSForest g ∅ o f) :
+    f.support = o ∧ ∀ v, v ∈ f.support ↔ ∃ r ∈ f.roots, Reachable g r v :=
   ⟨by simp [← hf.union],
     fun v ↦ ⟨hf.sound v, fun ⟨r, hr, hrv⟩ ↦ hf.complete v r (f.roots_subset_support hr) hrv⟩⟩
 
