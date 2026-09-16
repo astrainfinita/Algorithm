@@ -12,6 +12,7 @@ public import Mathlib.Algebra.Group.Hom.Instances
 public import Mathlib.Algebra.Group.Submonoid.Defs
 public import Mathlib.Algebra.GroupWithZero.Action.Defs
 
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.BigOperators.GroupWithZero.Action
 import Mathlib.Algebra.Group.Submonoid.BigOperators
 
