@@ -7,6 +7,7 @@ import Algorithm.Data.Classes.DefaultDict
 import Algorithm.Data.Classes.ToList
 -- import Mathlib.Data.List.Nodup
 import Mathlib.Combinatorics.Quiver.Path
+import Mathlib.Data.Finset.Union
 
 structure AdjList
     (V : Type*) (Info : Type*)
@@ -206,6 +207,52 @@ lemma adj_iff_star {v w : V} :
     g..Adj v w ↔ ∃ x ∈ g[v], g..snd x = w :=
   ⟨fun ⟨e⟩ ↦ ⟨(e : g..E).info, coe_info_mem_star _, coe_snd e⟩, fun ⟨e, he, h⟩ ↦ h ▸ .of_star e he⟩
 
+lemma Adj.star_ne_empty {v w : V} (h : g..Adj v w) : g[v] ≠ ∅ := by
+  obtain ⟨e, he, -⟩ := adj_iff_star.mp h
+  intro hv
+  exact not_mem_empty e (hv ▸ he)
+
+variable (g) in
+/-- The vertices incident to an edge of `g`, including both sources and targets. -/
+noncomputable def support : Finset V := by
+  classical
+  exact (toDFinsupp' g..star).support.biUnion fun v ↦
+    (toMultiset g[v]).toFinset.biUnion fun e ↦ {v, g..snd e}
+
+@[simp]
+lemma mem_support {v : V} :
+    v ∈ g..support ↔ ∃ w, g..Adj v w ∨ g..Adj w v := by
+  classical
+  simp only [support, Finset.mem_biUnion, DFinsupp'.mem_support_toFun,
+    coe_toDFinsupp'_eq_getElem, Multiset.mem_toFinset, mem_toMultiset,
+    Finset.mem_insert, Finset.mem_singleton]
+  constructor
+  · rintro ⟨u, _, e, he, rfl | rfl⟩
+    · exact ⟨g..snd e, .inl (.of_star e he)⟩
+    · exact ⟨u, .inr (.of_star e he)⟩
+  · rintro ⟨w, h | h⟩
+    · obtain ⟨e, he, rfl⟩ := adj_iff_star.mp h
+      exact ⟨v, h.star_ne_empty, e, he, .inl rfl⟩
+    · obtain ⟨e, he, rfl⟩ := adj_iff_star.mp h
+      exact ⟨w, h.star_ne_empty, e, he, .inr rfl⟩
+
+lemma mem_support_iff_exists_mem_star {v : V} :
+    v ∈ g..support ↔ (∃ e, e ∈ g[v]) ∨ ∃ w : V, ∃ e ∈ g[w], g..snd e = v := by
+  simp only [mem_support, adj_iff_star]
+  aesop
+
+lemma Adj.fst_mem_support {v w : V} (h : g..Adj v w) : v ∈ g..support :=
+  mem_support.mpr ⟨w, .inl h⟩
+
+lemma Adj.snd_mem_support {v w : V} (h : g..Adj v w) : w ∈ g..support :=
+  mem_support.mpr ⟨v, .inr h⟩
+
+lemma E.fst_mem_support (e : g..E) : e.fst ∈ g..support :=
+  (Adj.of_star e.info e.mem_star).fst_mem_support
+
+lemma E.snd_mem_support (e : g..E) : e.snd ∈ g..support :=
+  (Adj.of_star e.info e.mem_star).snd_mem_support
+
 namespace Reachable
 
 lemma rfl {v : V} : g..Reachable v v := ⟨.nil⟩
@@ -304,6 +351,15 @@ lemma mem_succSet_singleton_iff {v w : V} :
     w ∈ g..succSet {v} ↔ g..Adj v w := by
   simp
 
+lemma succSet_subset_support (s : Set V) : g..succSet s ⊆ (g..support : Set V) :=
+  fun _ ⟨_, _, h⟩ ↦ h.snd_mem_support
+
+lemma succSet_singleton_eq_empty_of_notMem_support {v : V} (hv : v ∉ g..support) :
+    g..succSet {v} = ∅ := by
+  apply Set.eq_empty_iff_forall_notMem.mpr
+  intro w hw
+  exact hv ((mem_succSet_singleton_iff.mp hw).fst_mem_support)
+
 @[simp]
 lemma succSet_empty :
     g..succSet ∅ = ∅ := by
@@ -373,6 +429,15 @@ def succList (v : V) : List V := (toList g[v]).map g..snd
 @[simp]
 lemma mem_succList_iff {v w : V} : w ∈ g..succList v ↔ g..Adj v w := by
   simp [succList, ← adj_iff_star]
+
+lemma succList_subset_support (v : V) : {w | w ∈ g..succList v} ⊆ (g..support : Set V) :=
+  fun _ hw ↦ ((g..mem_succList_iff).mp hw).snd_mem_support
+
+lemma succList_eq_nil_of_notMem_support {v : V} (hv : v ∉ g..support) :
+    g..succList v = [] := by
+  apply List.eq_nil_iff_forall_not_mem.mpr
+  intro w hw
+  exact hv (((g..mem_succList_iff).mp hw).fst_mem_support)
 
 @[simp]
 lemma succSet_singleton (v : V) : g..succSet {v} = {w | g..Adj v w} := by
