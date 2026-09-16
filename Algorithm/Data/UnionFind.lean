@@ -29,7 +29,6 @@ def rootCore (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = par
   else
     rootCore parent wf p
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 lemma rootCore_of_eq (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k]) (i : ι)
     (hi : parent[i] = i) : rootCore parent wf i = i := by
@@ -51,7 +50,6 @@ lemma parent_rootCore (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k �
   · exact h
   · exact parent_rootCore parent wf parent[i]
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 lemma transGen_rootCore (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i : ι) (hi : parent[i] ≠ i) :
@@ -62,7 +60,6 @@ lemma transGen_rootCore (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k 
   · rw [rootCore_parent]
     exact .tail (b := parent[i]) (transGen_rootCore parent wf parent[i] h) ⟨hi, rfl⟩
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 @[simp]
 lemma rootCore_eq_self (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
@@ -81,7 +78,6 @@ def findAux (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = pare
     let ⟨r, ps⟩ := findAux parent wf p
     ⟨r, ps[i ↦ r]⟩
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 @[simp]
 lemma findAux_fst (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
@@ -91,7 +87,6 @@ lemma findAux_fst (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j 
   · rfl
   · exact findAux_fst parent wf _
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 lemma findAux_snd_getElem (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i j : ι) : (findAux parent wf i).snd[j] = parent[j] ∨
@@ -106,7 +101,6 @@ lemma findAux_snd_getElem (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ 
       exact (findAux_snd_getElem parent wf parent[i] j).imp_right (by rw [·, rootCore])
     · simp [hi]
 termination_by wf.wrap i
-decreasing_by simp_wf; tauto
 
 lemma wellFounded_findAux (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i : ι) : WellFounded (fun j k : ι ↦ j ≠ k ∧ j = (findAux parent wf i).snd[k]) := by
@@ -133,7 +127,6 @@ lemma rootCore_findAux_snd_apply (parent : P) (wf : WellFounded fun j k : ι ↦
       · exact parent_rootCore parent wf j
       · rw [rootCore_eq_self, parent_rootCore]
 termination_by wf.wrap j
-decreasing_by simp_wf; tauto
 
 @[simp]
 lemma rootCore_findAux_snd (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
@@ -234,7 +227,6 @@ lemma setParent_root (parent : P) (size : S) (wf : WellFounded fun i j : ι ↦ 
     dsimp
     split_ifs <;> aesop
 termination_by wf.wrap k
-decreasing_by simp_wf; tauto
 
 def link (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i) (hj : self.parent[j] = j) :
     UnionFind ι P S :=
