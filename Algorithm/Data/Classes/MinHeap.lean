@@ -22,7 +22,7 @@ theorem inf_eq_top {m : Multiset α} : m.inf = ⊤ ↔ ∀ a ∈ m, a = ⊤ := b
 end Multiset
 
 class MinHeap (C : Type*) (α : outParam Type*)
-    [Preorder α] [IsTotal α (· ≤ ·)] extends
+    [Preorder α] [Std.Total (α := α) (· ≤ ·)] extends
     ToMultiset C α,
     EmptyCollection C, LawfulEmptyCollection C α,
     Insert α C, ToMultiset.LawfulInsert C α where
@@ -52,7 +52,7 @@ attribute [simp] headD_def toMultiset_tail deleteMin_def
 
 section
 
-variable {C α : Type*} [Preorder α] [IsTotal α (· ≤ ·)] [MinHeap C α] (c : C)
+variable {C α : Type*} [Preorder α] [Std.Total (α := α) (· ≤ ·)] [MinHeap C α] (c : C)
 
 lemma head?_ne_top (h : ¬isEmpty c) :
     (MinHeap.head? c) ≠ ⊤ := by

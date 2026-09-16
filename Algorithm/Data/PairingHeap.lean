@@ -130,7 +130,7 @@ lemma Heap.le_of_nodeWF [t : IsTrans α (le · ·)] [TotalBLE le]
       exact t.trans _ _ _ hx this
     · exact hs a hxs hb
 
-lemma Heap.le_of_wf [r : IsRefl α (le · ·)] [t : IsTrans α (le · ·)] [TotalBLE le]
+lemma Heap.le_of_wf [r : Std.Refl (le · ·)] [t : IsTrans α (le · ·)] [TotalBLE le]
     (a : α) (c s : Heap α) (hx : (node a c s).WF le) :
     ∀ b ∈ (node a c s).toListUnordered, le a b := by
   intro b hb
@@ -220,7 +220,7 @@ instance : Mergeable (PairingHeap α le) α where
   toMultiset_merge a x := by
     simp only [toMultiset, coe_toListUnordered_merge]
 
-instance [Preorder α] [IsTotal α (· ≤ ·)] [DecidableRel (α := α) (· ≤ ·)] :
+instance [Preorder α] [Std.Total (α := α) (· ≤ ·)] [DecidableRel (α := α) (· ≤ ·)] :
     MinHeap (PairingHeap α (· ≤ ·)) α where
   head? x := x.head?.rec ⊤ WithTop.some
   tail := tail

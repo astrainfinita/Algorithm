@@ -14,7 +14,7 @@ public import Mathlib.Data.Prod.Lex
 @[expose] public section
 
 class IndexedMinHeap (C : Type*) [Inhabited C] (ι : outParam Type*)
-    (α : outParam Type*) [Preorder α] [IsTotal α (· ≤ ·)] [OrderTop α] extends
+    (α : outParam Type*) [Preorder α] [Std.Total (α := α) (· ≤ ·)] [OrderTop α] extends
     DefaultDict C ι α fun _ ↦ ⊤ where
   minIdx : C → ι
   getElem_minIdx_le c (i : ι) : c[minIdx c] ≤ c[i]
@@ -143,13 +143,13 @@ instance [Preorder α] : Preorder (DefaultDictWithHeap.WithIdx α ι) where
   le_trans _ _ _ := le_trans
   lt_iff_le_not_ge _ _ := lt_iff_le_not_ge
 
-instance [Preorder α] [IsTotal α (· ≤ ·)] :
-    IsTotal (DefaultDictWithHeap.WithIdx α ι) (· ≤ ·) where
+instance [Preorder α] [Std.Total (α := α) (· ≤ ·)] :
+    Std.Total (α := DefaultDictWithHeap.WithIdx α ι) (· ≤ ·) where
   total _ _ := total_of (α := α) (· ≤ ·) _ _
 
 end DefaultDictWithHeap.WithIdx
 
-structure DefaultDictWithHeap (C C' : Type*) {ι α : Type*} [Preorder α] [IsTotal α (· ≤ ·)]
+structure DefaultDictWithHeap (C C' : Type*) {ι α : Type*} [Preorder α] [Std.Total (α := α) (· ≤ ·)]
     [Inhabited C] [DefaultDict C ι (WithTop α) ⊤]
     [MinHeap C' (DefaultDictWithHeap.WithIdx α ι)] where mk' ::
   defaultDict : C
@@ -159,7 +159,7 @@ structure DefaultDictWithHeap (C C' : Type*) {ι α : Type*} [Preorder α] [IsTo
     defaultDict[(MinHeap.head minHeap h).idx] = (MinHeap.head minHeap h).val
 
 namespace DefaultDictWithHeap
-variable {C C' : Type*} {ι α : Type*} [Preorder α] [IsTotal α (· ≤ ·)]
+variable {C C' : Type*} {ι α : Type*} [Preorder α] [Std.Total (α := α) (· ≤ ·)]
   [Inhabited C] [DefaultDict C ι (WithTop α) ⊤]
   [MinHeap C' (DefaultDictWithHeap.WithIdx α ι)]
 

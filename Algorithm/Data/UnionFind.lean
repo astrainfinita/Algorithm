@@ -69,7 +69,7 @@ lemma rootCore_eq_self (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k �
     (i : ι) : rootCore parent wf i = i ↔ parent[i] = i := by
   constructor
   · contrapose
-    exact fun hi ↦ @ne_of_irrefl _ _ wf.transGen.isIrrefl _ _ (transGen_rootCore parent wf i hi)
+    exact fun hi ↦ @ne_of_irrefl _ _ wf.transGen.irrefl _ _ (transGen_rootCore parent wf i hi)
   · exact rootCore_of_eq parent wf i
 
 def findAux (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k]) (i : ι) :

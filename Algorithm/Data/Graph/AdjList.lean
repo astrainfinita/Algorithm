@@ -265,7 +265,7 @@ variable (g) in
 @[refl]
 lemma refl (v : V) : g..Reachable v v := ⟨.nil⟩
 
-instance : IsRefl V g..Reachable := ⟨refl g⟩
+instance : Std.Refl g..Reachable := ⟨refl g⟩
 
 @[trans]
 lemma trans {u v w : V} (huv : g..Reachable u v) (hvw : g..Reachable v w) :

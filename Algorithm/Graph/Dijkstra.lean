@@ -189,7 +189,8 @@ lemma isLeastOfEdges_congr {g : G}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
     g..IsLeastOfEdges c ss cs t d = g..IsLeastOfEdges c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
-  congr!
+  subst hs
+  rfl
 
 lemma isLeastOfEdges_union {g : G}
     [AddMonoid CostType] [LinearOrder CostType]
@@ -288,7 +289,8 @@ lemma isDist'_congr {g : G}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
     g..IsDist' c ss cs t d = g..IsDist' c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
-  congr!
+  subst hs
+  rfl
 
 lemma isDist'_union {g : G}
     [AddMonoid CostType] [LinearOrder CostType]
@@ -357,7 +359,8 @@ lemma isDist_congr {g : G}
     {t : V} {d : WithTop CostType}
     (hs : ss = ss') :
     g..IsDist c ss cs t d = g..IsDist c ss' (fun v hv ↦ cs v (hs ▸ hv)) t d := by
-  congr!
+  subst hs
+  rfl
 
 lemma isDist_union {g : G}
     [AddMonoid CostType] [LinearOrder CostType]
