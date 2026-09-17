@@ -317,7 +317,6 @@ def IsDist (g : G)
     fun p : Quiver.Path (ToQuiver.mk g s) (ToQuiver.mk g t) ↦
       ↑(cs s hs + p.cost fun _ _ e ↦ c (e : E g).info)) d
 
-set_option backward.isDefEq.respectTransparency false in
 lemma isDist_top_iff {g : G}
     [AddMonoid CostType] [Preorder CostType]
     {c : Info → CostType}
@@ -363,7 +362,6 @@ lemma isDist_congr {g : G}
   subst hs
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 lemma isDist_union {g : G}
     [AddMonoid CostType] [LinearOrder CostType]
     {c : Info → CostType}
@@ -379,7 +377,6 @@ lemma isDist_union {g : G}
   simp_rw [Set.mem_union, Set.iUnion_or, Set.iUnion_union_distrib, isGLB_union_iff]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 def dijkstraStep (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -395,7 +392,6 @@ def dijkstraStep (g : G) (c : Info → CostType)
       if r[snd g e] = ⊤ then some (snd g e, ↑(d + c e)) else none,
     r)
 
-set_option backward.isDefEq.respectTransparency false in
 structure dijkstraStep.Spec (g : G) (c : Info → CostType)
     [AddMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -410,7 +406,6 @@ structure dijkstraStep.Spec (g : G) (c : Info → CostType)
   h₄ : ∀ v : V, (∃ s, init[s] ≠ ⊤ ∧ Reachable g s v) ↔
     v ∈ traversal g {v | res[v] ≠ ⊤} {v | heap[v] ≠ ⊤}
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_snd_getElem (g : G) (c : Info → CostType)
     [DecidableEq V] [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -420,7 +415,6 @@ lemma dijkstraStep_snd_getElem (g : G) (c : Info → CostType)
       if v = minIdx heap then heap[minIdx heap] else res[v] := by
   simp [dijkstraStep, eq_comm]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_snd_getElem_eq_top (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -434,7 +428,6 @@ lemma dijkstraStep_snd_getElem_eq_top (g : G) (c : Info → CostType)
   · simpa [h]
   · simp [h]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_snd_support (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -484,7 +477,6 @@ lemma dijkstraStep_fst_getElem' (g : G) (c : Info → CostType)
       exact absurd h.2 ressnde
     · rfl
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_fst_getElem (g : G) (c : Info → CostType)
     [DecidableEq V] [DecidableEq Info]
     [AddCommMonoid CostType] [LinearOrder CostType]
@@ -512,7 +504,6 @@ lemma dijkstraStep_fst_getElem (g : G) (c : Info → CostType)
     simp only [ToQuiver.mk.injEq] at fste snde; subst fste snde
     exact ⟨x, hx, rfl, rfl⟩
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -536,7 +527,6 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
   rw [exists_true_iff_nonempty]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -552,7 +542,6 @@ lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
     Set.mem_insert_iff]
   tauto
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -705,7 +694,6 @@ noncomputable def unsettledSupport (g : G)
     (heap : DistHeap) (res : DistArray) : Finset V := by
   classical exact {v ∈ support g ∪ (toDFinsupp' heap).support | res[v] = ⊤}
 
-set_option backward.isDefEq.respectTransparency false in
 lemma unsettledSupport_dijkstraStep [DecidableEq V] (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray]
@@ -724,7 +712,6 @@ lemma unsettledSupport_dijkstraStep [DecidableEq V] (g : G) (c : Info → CostTy
     mem_succSet_singleton_iff]
   tauto
 
-set_option backward.isDefEq.respectTransparency false in
 lemma unsettledSupport_dijkstraStep_ssubset (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray]
@@ -743,7 +730,6 @@ lemma unsettledSupport_dijkstraStep_ssubset (g : G) (c : Info → CostType)
 
 attribute [local instance] WellFoundedLT.toWellFoundedRelation
 
-set_option backward.isDefEq.respectTransparency false in
 def dijkstra (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
     (DistArray : Type*) [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
@@ -774,7 +760,6 @@ decreasing_by exact unsettledSupport_dijkstraStep_ssubset g c heap res hh spec.1
     · simp
     · simp [traversal]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstra_spec (g : G) (c : Info → CostType)
     [AddCommMonoid CostType] [LinearOrder CostType] [CanonicallyOrderedAdd CostType]
     (DistArray : Type*) [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
