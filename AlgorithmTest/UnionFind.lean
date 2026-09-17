@@ -1,6 +1,7 @@
 module
 
 import Algorithm.Data.UnionFind
+meta import Algorithm.Data.UnionFind  -- shake: keep (for `#eval` testing)
 
 abbrev UF := UnionFind (Fin 10) (Vector (Fin 10) 10) (Vector Nat 10)
 
