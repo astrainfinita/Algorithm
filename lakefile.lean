@@ -2,7 +2,7 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.32.1"
+require "leanprover-community" / "mathlib" @ git "v4.32.2"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
