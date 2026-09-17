@@ -192,7 +192,7 @@ lemma dfsForest_spec' (g : G)
     (f.support = {v : V | vis[v]}) ∧
       ∀ v, v ∈ f.support ↔ ∃ r ∈ vs, Reachable g r v := by
   have := isDFSForest_dfsForest' g vs (default : BoolArray)
-  simp only [DefaultDict.getElem_default, Bool.false_eq_true, Set.setOf_false] at this
+  simp only [DefaultDict.getElem_default, Bool.false_eq_true, Set.ofPred_false] at this
   dsimp
   refine ⟨this.spec.1,
     fun v ↦ ⟨fun hv ↦ ?_, fun ⟨r, hr, hrv⟩ ↦ this.complete v r ?_ hrv⟩⟩
@@ -206,7 +206,7 @@ lemma dfsForest_spec (g : G)
     let (f, vis) := (dfsForest g vs (default : BoolArray))
     f.support = {v : V | vis[v]} ∧ ∀ v : V, vis[v] ↔ ∃ r ∈ vs, Reachable g r v := by
   have h := dfsForest_spec' g BoolArray vs
-  exact ⟨h.1, fun v ↦ by simpa only [h.1, Set.mem_setOf_eq] using h.2 v⟩
+  exact ⟨h.1, fun v ↦ by simpa only [h.1, Set.mem_ofPred_eq] using h.2 v⟩
 
 def dfs' (g : G) {BoolArray : Type*} [Inhabited BoolArray]
     [DefaultDict BoolArray V Bool fun _ ↦ false]
@@ -334,7 +334,7 @@ lemma dfsTR_spec' (g : G)
     · ext; simp (config := { contextual := true })
     · classical
       ext
-      simp only [Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union, List.mem_append,
+      simp only [Set.mem_ofPred_eq, Set.mem_sdiff, Set.mem_union, List.mem_append,
         List.mem_cons, mem_succList_iff, mem_succSet_singleton_iff, Set.mem_insert_iff]
       aesop
 

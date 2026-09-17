@@ -65,7 +65,7 @@ namespace Multiset -- should be in mathlb
 variable {α : Type*} [SemilatticeInf α] [OrderTop α]
 
 theorem inf_congr {m₁ m₂ : Multiset α} (hm : ∀ a, a ∈ m₁ ↔ a ∈ m₂) : m₁.inf = m₂.inf := by
-  haveI : DecidableEq α := by classical infer_instance
+  have : DecidableEq α := by classical infer_instance
   rw [← m₁.inf_dedup, ← m₂.inf_dedup]
   congr 1
   ext a
@@ -79,7 +79,7 @@ variable {β α : Type*} [SemilatticeInf α] [OrderTop α] [DecidableEq β]
 @[simp]
 theorem inf_toFinset (m : Multiset β) (f : β → α) : m.toFinset.inf f = (m.map f).inf := by
   change (m.dedup.map f).inf = _
-  haveI : DecidableEq α := by classical infer_instance
+  have : DecidableEq α := by classical infer_instance
   rw [← (m.dedup.map f).inf_dedup, ← (m.map f).inf_dedup, Multiset.dedup_map_dedup_eq]
 
 end Finset
@@ -442,7 +442,7 @@ lemma dijkstraStep_snd_support (g : G) (c : Info → CostType)
     {v : V | (dijkstraStep g c heap res hMinIdx).2[v] ≠ ⊤} =
       insert (minIdx heap) {v : V | res[v] ≠ ⊤} := by
   ext
-  simp only [ne_eq, dijkstraStep_snd_getElem_eq_top, not_and, Set.mem_setOf_eq, Set.mem_insert_iff]
+  simp only [ne_eq, dijkstraStep_snd_getElem_eq_top, not_and, Set.mem_ofPred_eq, Set.mem_insert_iff]
   tauto
 
 lemma dijkstraStep_fst_getElem' (g : G) (c : Info → CostType)
@@ -524,7 +524,7 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
   simp? [hMinIdx, - not_or] says
     simp only [ne_eq, ite_eq_left_iff, inf_eq_top_iff, Finset.inf_eq_top_iff, Finset.mem_univ,
       WithTop.add_eq_top, hMinIdx, WithTop.coe_ne_top, or_self, imp_false, not_true_eq_false,
-      succSet_singleton, Set.mem_setOf_eq]
+      succSet_singleton, Set.mem_ofPred_eq]
   rw [← or_iff_not_imp_right]
   congr!
   rw [iff_not_comm]
@@ -543,7 +543,7 @@ lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
         (insert (minIdx heap) {v : V | res[v] ≠ ⊤}) := by
   ext
   simp only [ne_eq, dijkstraStep_fst_getElem_eq_top (spec₁ := spec₁), mem_succSet_iff,
-    Set.mem_singleton_iff, exists_eq_left, Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union,
+    Set.mem_singleton_iff, exists_eq_left, Set.mem_ofPred_eq, Set.mem_sdiff, Set.mem_union,
     Set.mem_insert_iff]
   tauto
 
@@ -574,7 +574,7 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     rw [isLeastOfEdges_congr (dijkstraStep_snd_support _ _ _ _ _)]
     rw [isLeastOfEdges_congr Set.union_singleton.symm]
     rw [isLeastOfEdges_union]
-    simp only [ne_eq, Set.mem_setOf_eq, dijkstraStep_snd_getElem]
+    simp only [ne_eq, dijkstraStep_snd_getElem]
     by_cases wmin : w = minIdx heap
     · subst wmin
       simp at resw
@@ -602,7 +602,7 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
         obtain ⟨e, he⟩ := he
         constructor
         · intro d hd
-          simp only [Set.mem_setOf_eq, WithTop.coe_add, WithTop.coe_untop, Set.mem_iUnion,
+          simp only [Set.mem_ofPred_eq, WithTop.coe_add, WithTop.coe_untop, Set.mem_iUnion,
             Set.mem_range, exists_prop] at hd
           obtain ⟨v, resv, evw, rfl⟩ := hd
           split_ifs with hv
@@ -633,8 +633,8 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     · simp only [ne_eq, wmin, not_false_eq_true, true_and] at resw ⊢
       exact h₃ w resw
     rw [not_not] at wmin; subst wmin
-    simp only [ne_eq, Set.mem_setOf_eq, ↓reduceIte]
-    simp only [ne_eq, Set.mem_setOf_eq, isLeastOfEdges_iff, WithTop.coe_untop, exists_prop,
+    simp only [ne_eq, ↓reduceIte]
+    simp only [ne_eq, Set.mem_ofPred_eq, isLeastOfEdges_iff, WithTop.coe_untop, exists_prop,
       isDist'_iff] at h₂ h₃ ⊢
     constructor
     · obtain ⟨d, hd, h₂⟩ := h₂ (minIdx heap) rMinIdx
@@ -686,7 +686,7 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     · ext s
       simpa using (h₁ _).resolve_right
     · ext s
-      simp only [Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union, mem_succSet_iff,
+      simp only [Set.mem_ofPred_eq, Set.mem_sdiff, Set.mem_union, mem_succSet_iff,
         Set.mem_singleton_iff, exists_eq_left, Set.mem_insert_iff]
       tauto
 
@@ -757,7 +757,7 @@ decreasing_by exact unsettledSupport_dijkstraStep_ssubset g c heap res hh spec.1
     constructor
     · simp
     · simp only [DefaultDict.getElem_default, ne_eq,
-        not_true_eq_false, IsEmpty.forall_iff, implies_true, and_true, Set.mem_setOf_eq,
+        not_true_eq_false, IsEmpty.forall_iff, implies_true, and_true,
         forall_true_left]
       intro h
       use ⊤
@@ -786,7 +786,7 @@ lemma dijkstra_spec (g : G) (c : Info → CostType)
     unfold dijkstra at this
     convert this
     ext v
-    simp only [ne_eq, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not]
+    simp only [ne_eq, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not]
     rw [eq_top_iff]
     apply le_trans _ (getElem_minIdx_le _ _)
     rw [spec.2]

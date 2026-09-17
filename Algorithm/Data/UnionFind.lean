@@ -305,12 +305,12 @@ lemma setParent_wf (self : UnionFind ι P S)
   split_ifs at hk ⊢ with hjk hik hij
   · simp [hik, hjk] at hij
   · subst hjk
-    · rw [ENat.coe_add, h i hi, h j hk,
+    · rw [ENat.natCast_add, h i hi, h j hk,
         ← Set.encard_union_eq (by rw [Set.disjoint_iff]; intro; aesop)]
       congr
       ext x
       simp? [setParent_root] says
-        simp only [Set.mem_union, Set.mem_setOf_eq, setParent_root, ite_eq_left_iff]
+        simp only [Set.mem_union, Set.mem_ofPred_eq, setParent_root, ite_eq_left_iff]
       rw [rootCore]
       split_ifs with h
       · rw [root_of_parent_eq _ _ h]; tauto

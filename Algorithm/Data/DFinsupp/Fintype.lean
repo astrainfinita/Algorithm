@@ -20,7 +20,7 @@ instance DFinsupp'.fintype {ι : Type*} {π : ι → Type*} [DecidableEq ι] {d�
 
 instance DFinsupp'.infinite_of_left {ι : Type*} {π : ι → Type*} [∀ i, Nontrivial (π i)]
     {dπ : ∀ i, π i} [Infinite ι] : Infinite (Π₀' i, [π i, dπ i]) := by
-  letI := Classical.decEq ι; choose m hm using fun i => exists_ne (dπ i : π i);
+  let := Classical.decEq ι; choose m hm using fun i => exists_ne (dπ i : π i);
     exact Infinite.of_injective _ (DFinsupp'.single_left_injective hm)
 
 /-- See `DFinsupp'.infinite_of_right` for this in instance form, with the drawback that
