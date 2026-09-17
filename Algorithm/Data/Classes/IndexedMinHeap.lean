@@ -253,7 +253,6 @@ lemma set_defaultDict [DecidableEq α] (c : DefaultDictWithHeap C C') (i : ι) (
     c[i ↦ x].defaultDict = c.defaultDict[i ↦ x] := by
   unfold_projs; simp
 
-set_option backward.isDefEq.respectTransparency false in
 instance [Inhabited ι] [DecidableEq α] :
     IndexedMinHeap (DefaultDictWithHeap C C') ι (WithTop α) where
   minIdx c := if h : isEmpty c.minHeap then default else (MinHeap.head c.minHeap h).idx
