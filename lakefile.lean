@@ -2,7 +2,7 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.32.0-rc1"
+require "leanprover-community" / "mathlib" @ git "v4.32.0"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
@@ -17,6 +17,9 @@ abbrev algorithmLeanOptions := #[
     algorithmOnlyLinters.map fun s ↦ { s with name := `weak ++ s.name }
 
 package algorithm where
+  fixedToolchain := true
+  platformIndependent := true
+  restoreAllArtifacts := true
   testDriver := "AlgorithmTest"
   lintDriver := "batteries/runLinter"
   lintDriverArgs := #["Algorithm"]

@@ -82,6 +82,14 @@ jobs:
           mode: check
           ref: ${{ github.sha }}
 
+      - name: Check source file extensions
+        run: |
+          unexpected="$(git ls-files 'Algorithm/*' 'AlgorithmTest/*' | grep -Ev '\.(lean|md)$' || true)"
+          if [ -n "$unexpected" ]; then
+            printf 'Source files must have a .lean or .md extension:\n%s\n' "$unexpected"
+            exit 1
+          fi
+
   docs:
     name: build docs
     needs: [build, style]

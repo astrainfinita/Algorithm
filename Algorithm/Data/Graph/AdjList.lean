@@ -298,13 +298,12 @@ def ReachableWithin (s : Set V) (v w : V) : Prop :=
 
 lemma ReachableWithin.mono {s t : Set V} {v w : V} (hst : s ⊆ t) (h : ReachableWithin g s v w) :
     ReachableWithin g t v w :=
-  Relation.ReflTransGen.mono (fun _ _ ↦ And.imp_right (hst ·)) h
+  Relation.ReflTransGen.mono (fun _ _ ↦ And.imp_right (hst ·)) v w h
 
 @[simp]
 lemma reachableWithin_univ {v w : V} :
     ReachableWithin g Set.univ v w ↔ Reachable g v w := by
-  rw [reachable_eq_reflTransGen]
-  exact ⟨Relation.ReflTransGen.mono (by simp), Relation.ReflTransGen.mono (by simp)⟩
+  simp only [ReachableWithin, Set.mem_univ, and_true, reachable_eq_reflTransGen]
 
 lemma ReachableWithin.cases_head {s : Set V} {v w : V} (h : ReachableWithin g s v w) :
     v = w ∨ ∃ x, (Adj g v x ∧ x ∈ s) ∧ ReachableWithin g s x w :=
