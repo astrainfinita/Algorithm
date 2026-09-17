@@ -445,7 +445,6 @@ lemma dijkstraStep_snd_support (g : G) (c : Info → CostType)
   simp only [ne_eq, dijkstraStep_snd_getElem_eq_top, not_and, Set.mem_setOf_eq, Set.mem_insert_iff]
   tauto
 
-set_option backward.isDefEq.respectTransparency false in
 lemma dijkstraStep_fst_getElem' (g : G) (c : Info → CostType)
     [DecidableEq V] [AddCommMonoid CostType] [LinearOrder CostType]
     {DistArray : Type*} [Inhabited DistArray] [DefaultDict DistArray V (WithTop CostType) fun _ ↦ ⊤]
