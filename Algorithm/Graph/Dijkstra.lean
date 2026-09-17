@@ -544,7 +544,7 @@ lemma dijkstraStep_fst_support (g : G) (c : Info → CostType)
         (insert (minIdx heap) {v : V | res[v] ≠ ⊤}) := by
   ext
   simp only [ne_eq, dijkstraStep_fst_getElem_eq_top (spec₁ := spec₁), mem_succSet_iff,
-    Set.mem_singleton_iff, exists_eq_left, Set.mem_setOf_eq, Set.mem_diff, Set.mem_union,
+    Set.mem_singleton_iff, exists_eq_left, Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union,
     Set.mem_insert_iff]
   tauto
 
@@ -687,7 +687,7 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     · ext s
       simpa using (h₁ _).resolve_right
     · ext s
-      simp only [Set.mem_setOf_eq, Set.mem_diff, Set.mem_union, mem_succSet_iff,
+      simp only [Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union, mem_succSet_iff,
         Set.mem_singleton_iff, exists_eq_left, Set.mem_insert_iff]
       tauto
 

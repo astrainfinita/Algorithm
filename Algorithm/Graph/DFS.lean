@@ -334,7 +334,7 @@ lemma dfsTR_spec' (g : G)
     · ext; simp (config := { contextual := true })
     · classical
       ext
-      simp only [Set.mem_setOf_eq, Set.mem_diff, Set.mem_union, List.mem_append,
+      simp only [Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_union, List.mem_append,
         List.mem_cons, mem_succList_iff, mem_succSet_singleton_iff, Set.mem_insert_iff]
       aesop
 

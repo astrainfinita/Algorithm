@@ -387,7 +387,7 @@ lemma traversal_insert (s t : Set V) (v : V) (hv : v ∈ t) (t' : Set V)
   · rintro ((rfl | h) | h)
     · exact .inr ⟨w, hv, .refl⟩
     · exact .inl h
-    · simp only [Set.mem_diff, Set.mem_union, mem_succSet_iff, Set.mem_singleton_iff,
+    · simp only [Set.mem_sdiff, Set.mem_union, mem_succSet_iff, Set.mem_singleton_iff,
         exists_eq_left, Set.mem_insert_iff, not_or, Set.mem_setOf_eq] at h
       obtain ⟨x, ⟨(hx | hx), hx'⟩, hxw⟩ := h
       · exact .inr ⟨x, hx, hxw.mono (Set.compl_subset_compl.mpr (Set.subset_insert _ _))⟩
@@ -401,7 +401,7 @@ lemma traversal_insert (s t : Set V) (v : V) (hv : v ∈ t) (t' : Set V)
         simp only [sdiff_compl, Set.inf_eq_inter, Set.mem_inter_iff, Set.mem_compl_iff, hst,
           not_false_eq_true, Set.mem_singleton_iff, true_and] at hxv
         right
-        simp only [← Set.union_singleton, Set.mem_diff, Set.mem_union, mem_succSet_iff,
+        simp only [← Set.union_singleton, Set.mem_sdiff, Set.mem_union, mem_succSet_iff,
           Set.mem_singleton_iff, exists_eq_left, not_or, Set.compl_union, Set.mem_setOf_eq]
         exact ⟨x, ⟨.inl hx, hst, hxv⟩, h⟩
       · simp only [sdiff_compl, Set.inf_eq_inter, Set.mem_inter_iff, Set.mem_compl_iff,
