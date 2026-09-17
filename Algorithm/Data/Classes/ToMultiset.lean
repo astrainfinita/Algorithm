@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Classes.Erase
 public import Mathlib.Data.Multiset.AddSub
 
+/-!
+# Multiset views of collections
+
+Multiset views and laws relating them to collection operations.
+-/
+
 @[expose] public section
 
 variable {C α : Type*}

@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Forest
 public import Algorithm.Data.Graph.AdjList
 
+/-!
+# Specification of depth-first search forests
+
+An inductive specification of depth-first search forests and their traversal properties.
+-/
+
 @[expose] public section
 
 namespace AdjListClass

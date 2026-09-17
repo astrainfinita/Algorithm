@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Classes.GetElem
 public import Mathlib.Data.Set.Card
 
+/-!
+# Union-find
+
+Union-find with path compression, union by size, and a quotient interface.
+-/
+
 @[expose] public section
 
 namespace UnionFindImpl

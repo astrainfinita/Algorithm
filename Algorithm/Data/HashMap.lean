@@ -7,6 +7,12 @@ module
 
 public import Algorithm.Data.Classes.Dict
 
+/-!
+# Hash maps
+
+Dictionary and collection instances for `Std.HashMap`.
+-/
+
 @[expose] public section
 
 namespace Std.HashMap

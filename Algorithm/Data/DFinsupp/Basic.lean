@@ -5,7 +5,7 @@ Authors: Yuyang Zhao
 -/
 module
 
-public import Algorithm.Data.DFinsupp'.Defs
+public import Algorithm.Data.DFinsupp.Defs
 public import Mathlib.Data.Finset.Preimage
 
 /-!

@@ -7,6 +7,12 @@ module
 
 public import Algorithm.Data.Graph.IsDFSForest
 
+/-!
+# Depth-first search
+
+Depth-first search and its correctness proofs.
+-/
+
 @[expose] public section
 
 namespace AdjListClass

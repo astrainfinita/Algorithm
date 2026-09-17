@@ -9,6 +9,12 @@ public import Algorithm.Data.Classes.ToMultiset
 
 import Algorithm.Tactic.Attr.Register
 
+/-!
+# List views of collections
+
+List views and interfaces for accessing, inserting, and removing elements at either end.
+-/
+
 @[expose] public section
 
 variable {C α : Type*}

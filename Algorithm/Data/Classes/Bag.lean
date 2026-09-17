@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Classes.MultiBag
 public import Algorithm.Data.Classes.ToFinset
 
+/-!
+# Set-like collections
+
+Interfaces for finite sets with decidable membership, insertion, and erasure.
+-/
+
 @[expose] public section
 
 class Bag.ReadOnly (C : Type*) (α : outParam Type*) extends

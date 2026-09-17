@@ -14,6 +14,12 @@ import Mathlib.Algebra.Order.Monoid.WithTop
 import Mathlib.Data.Set.Lattice
 import Mathlib.Tactic.Order
 
+/-!
+# Dijkstra's algorithm
+
+Shortest path specifications and a verified implementation of Dijkstra's algorithm.
+-/
+
 @[expose] public section
 
 section -- should be in mathlb
