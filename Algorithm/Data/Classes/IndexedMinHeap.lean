@@ -237,7 +237,7 @@ instance [DecidableEq α] :
       c.defaultDict[i ↦ x]
       (if hx : x = ⊤ then c.minHeap else insert ⟨x.untop hx, i⟩ c.minHeap)
       fun j hj ↦ by
-        haveI : DecidableEq ι := by classical infer_instance
+        have : DecidableEq ι := by classical infer_instance
         split_ifs with hx <;>
           simp? [Function.update_apply] at hj ⊢ says
             simp only [all_valid, getElem_setElem, defaultDict_getElem, ne_eq] at hj ⊢

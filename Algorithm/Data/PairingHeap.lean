@@ -241,7 +241,7 @@ instance [Preorder α] [Std.Total (α := α) (· ≤ ·)] [DecidableRel (α := �
       simp_rw [PairingHeapImp.Heap.toListUnordered_node, PairingHeapImp.Heap.toListUnordered_nil,
         List.append_nil, ← Multiset.cons_coe, Multiset.mem_cons] at hb
       obtain (rfl | hb) := hb; · rfl
-      haveI : TotalBLE (α := α) (· ≤ ·) := ⟨by simp [total_of]⟩
+      have : TotalBLE (α := α) (· ≤ ·) := ⟨by simp [total_of]⟩
       have := @PairingHeapImp.Heap.le_of_wf α (· ≤ ·) ⟨by simp⟩
         ⟨by simpa using fun _ _ _ ↦ le_trans⟩ _ a c .nil hwf
       simp? at this says

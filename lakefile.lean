@@ -2,7 +2,7 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.33.0-rc1"
+require "leanprover-community" / "mathlib" @ git "v4.33.0-rc2"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
@@ -30,3 +30,4 @@ lean_lib Algorithm where
 
 lean_lib AlgorithmTest where
   globs := #[`AlgorithmTest.+]
+  leanOptions := #[⟨`pp.mvars.anonymous, false⟩] -- Test stability: print `?m.37` as `?_`.

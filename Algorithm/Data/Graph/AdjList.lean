@@ -367,7 +367,7 @@ lemma succSet_empty :
 @[simp]
 lemma succSet_union {s t : Set V} :
     succSet g (s ∪ t) = succSet g s ∪ succSet g t := by
-  simp [succSet, or_and_right, exists_or, Set.setOf_or]
+  simp [succSet, or_and_right, exists_or, Set.ofPred_or]
 
 variable (g) in
 def traversal (s t : Set V) : Set V :=
@@ -387,7 +387,7 @@ lemma traversal_insert (s t : Set V) (v : V) (hv : v ∈ t) (t' : Set V)
     · exact .inr ⟨w, hv, .refl⟩
     · exact .inl h
     · simp only [Set.mem_sdiff, Set.mem_union, mem_succSet_iff, Set.mem_singleton_iff,
-        exists_eq_left, Set.mem_insert_iff, not_or, Set.mem_setOf_eq] at h
+        exists_eq_left, Set.mem_insert_iff, not_or, Set.mem_ofPred_eq] at h
       obtain ⟨x, ⟨(hx | hx), hx'⟩, hxw⟩ := h
       · exact .inr ⟨x, hx, hxw.mono (Set.compl_subset_compl.mpr (Set.subset_insert _ _))⟩
       refine .inr ⟨v, hv, ?_⟩
@@ -401,7 +401,7 @@ lemma traversal_insert (s t : Set V) (v : V) (hv : v ∈ t) (t' : Set V)
           not_false_eq_true, Set.mem_singleton_iff, true_and] at hxv
         right
         simp only [← Set.union_singleton, Set.mem_sdiff, Set.mem_union, mem_succSet_iff,
-          Set.mem_singleton_iff, exists_eq_left, not_or, Set.compl_union, Set.mem_setOf_eq]
+          Set.mem_singleton_iff, exists_eq_left, not_or, Set.compl_union, Set.mem_ofPred_eq]
         exact ⟨x, ⟨.inl hx, hst, hxv⟩, h⟩
       · simp only [sdiff_compl, Set.inf_eq_inter, Set.mem_inter_iff, Set.mem_compl_iff,
           Set.mem_singleton_iff] at hxv
