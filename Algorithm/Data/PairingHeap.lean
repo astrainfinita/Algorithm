@@ -247,7 +247,7 @@ instance [Preorder α] [Std.Total (α := α) (· ≤ ·)] [DecidableRel (α := �
       simp? at this says
         simp only [PairingHeapImp.Heap.toListUnordered_node,
           PairingHeapImp.Heap.toListUnordered_nil, List.append_nil, List.mem_cons,
-          decide_eq_true_eq, forall_eq_or_imp, le_refl, true_and] at this
+          decide_eq_true_eq, forall_eq_or_imp, Std.le_refl, true_and] at this
       simpa [head?, PairingHeapImp.Heap.head?] using this b hb
   toMultiset_tail x h := by
     match x with
