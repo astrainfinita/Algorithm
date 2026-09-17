@@ -146,14 +146,13 @@ def indicator (s : Finset ι) (f : ∀ i ∈ s, α) : C :=
 
 variable {C}
 
-set_option backward.isDefEq.respectTransparency false in
 lemma getElem_indicator [DecidableEq ι] (s : Finset ι) (f : ∀ i ∈ s, α) (i) :
     (indicator C s f)[i] = if hi : i ∈ s then f i hi else d := by
   unfold indicator
   change _ = if hi : i ∈ s.1 then _ else _
-  obtain ⟨l, hl⟩ := s.1.exists_rep
-  simp_rw [← hl, Equiv.subtypeQuotientEquivQuotientSubtype_mk]
-  dsimp
+  obtain ⟨s, hs⟩ := s
+  induction s using Quotient.inductionOn with | _ l => ?_
+  change (listIndicator C l _)[i] = _
   rw [getElem_listIndicator]
   rfl
 

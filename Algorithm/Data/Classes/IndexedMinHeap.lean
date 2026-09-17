@@ -76,15 +76,15 @@ abbrev minAux (a : Vector α n) : Lex (α × Fin n) :=
 def minIdx (a : Vector α n) : Fin n :=
   a.minAux.2
 
-set_option backward.isDefEq.respectTransparency false in
 lemma minIdx_spec (a : Vector α n) (i : Fin n) :
     a[a.minIdx] < a[i] ∨ a[a.minIdx] = a[i] ∧ a.minIdx ≤ i := by
   have : (ofLex a.minAux).1 = a[a.minIdx] := by
     unfold minIdx minAux
     obtain ⟨i, -, h⟩ := (⊤ : Finset (Fin n)).exists_mem_eq_inf'
       ⟨0, Finset.mem_univ 0⟩ (fun i ↦ toLex (a[i], i))
+    replace h := congr(ofLex $h)
     rw [Prod.eq_iff_fst_eq_snd_eq] at h
-    obtain ⟨h : _ = a[i], rfl : _ = i⟩ := h
+    obtain ⟨h, rfl⟩ := h
     exact h
   rw [← this]
   apply (Prod.Lex.le_iff (y := (a[i], i))).mp
@@ -92,7 +92,7 @@ lemma minIdx_spec (a : Vector α n) (i : Fin n) :
 
 lemma minIdx_le (a : Vector α n) (i : Fin n) :
     a[a.minIdx] ≤ a[i] :=
-  (a.minIdx_spec i).elim LT.lt.le (fun ⟨h, _⟩ ↦ h.le)
+  (a.minIdx_spec i).elim le_of_lt (fun ⟨h, _⟩ ↦ h.le)
 
 end ReadOnly
 
