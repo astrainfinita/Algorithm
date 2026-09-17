@@ -20,7 +20,7 @@ export Membership.IsEmpty (isEmpty isEmpty_iff_forall_not_mem)
 lemma isEmpty_eq_false_iff_exists_mem [Membership α C] [Membership.IsEmpty C] {c : C} :
     isEmpty c = false ↔ ∃ a, a ∈ c := by
   rw [Bool.eq_false_iff, not_iff_comm, isEmpty_iff_forall_not_mem]
-  push_neg
+  push Not
   rfl
 
 @[mk_iff]
