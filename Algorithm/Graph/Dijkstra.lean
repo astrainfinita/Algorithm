@@ -784,6 +784,7 @@ lemma dijkstra_spec (g : G) (c : Info → CostType)
     push Not at this
     rw [this]
     have : v ∉ traversal g {v | (dijkstra g c DistArray init)[v] ≠ ⊤} ∅ := by simpa [traversal]
+    unfold dijkstra at this
     convert this
     ext v
     simp only [ne_eq, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not]
