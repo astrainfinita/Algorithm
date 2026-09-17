@@ -2,11 +2,12 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.30.0-rc1"
+require "leanprover-community" / "mathlib" @ git "v4.30.0-rc2"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
   ⟨`linter.style.longFile, .ofNat 1500⟩,
+  ⟨`linter.unicodeLinter, false⟩, -- Allow multilingual text.
 ]
 
 abbrev algorithmLeanOptions := #[
