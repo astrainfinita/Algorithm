@@ -143,7 +143,6 @@ variable [DecidableEq ι]
 
 variable [∀ (i) (x : β i), Decidable (x ≠ d i)]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Equivalence between dependent functions with finite support `s : Finset ι` and functions
 `∀ i, {x : β i // x ≠ d i}`. -/
 @[simps]
