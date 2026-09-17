@@ -21,6 +21,8 @@ jobs:
       LEAN_ABORT_ON_PANIC: '1'
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Enable Lean annotations
         # This fork supports Lean diagnostics and has no release tags.
@@ -89,6 +91,8 @@ jobs:
       LEAN_ABORT_ON_PANIC: '1'
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Lean
         uses: leanprover/lean-action@v1.6.0
