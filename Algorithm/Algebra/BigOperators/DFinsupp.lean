@@ -1,4 +1,3 @@
-
 /-
 Copyright (c) 2024 Yuyang Zhao. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -6,7 +5,7 @@ Authors: Yuyang Zhao
 -/
 module
 
-public import Algorithm.Data.DFinsupp'.Basic
+public import Algorithm.Data.DFinsupp.Basic
 public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 public import Mathlib.Algebra.Group.Hom.Instances
 public import Mathlib.Algebra.Group.Submonoid.Defs
@@ -164,13 +163,13 @@ variable [∀ (i) (x : β i), Decidable (x ≠ d i)]
 theorem coe_dfinsupp'_prod [Monoid R] [CommMonoid S]
     (f : Π₀' i, [β i, d i]) (g : ∀ i, β i → R →* S) :
     ⇑(f.prod g) = f.prod fun a b => ⇑(g a b) :=
-  coe_finset_prod _ _
+  coe_finsetProd _ _
 
 @[to_additive]
 theorem dfinsupp'_prod_apply [Monoid R] [CommMonoid S]
     (f : Π₀' i, [β i, d i]) (g : ∀ i, β i → R →* S) (r : R) :
     (f.prod g) r = f.prod fun a b => (g a b) r :=
-  finset_prod_apply _ _ _
+  finsetProd_apply _ _ _
 
 end MonoidHom
 

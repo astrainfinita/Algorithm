@@ -7,6 +7,12 @@ module
 
 public import Algorithm.Data.Classes.ToMultiset
 
+/-!
+# Multiset-like collections
+
+Interfaces for finite multisets with multiplicities, decidable membership, insertion, and erasure.
+-/
+
 @[expose] public section
 
 abbrev DecidableMem (α : Type*) (C : Type*) [Membership α C] :=

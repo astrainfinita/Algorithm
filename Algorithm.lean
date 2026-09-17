@@ -1,6 +1,6 @@
 module  -- shake: keep-all
 
-public import Algorithm.Algebra.BigOperators.DFinsupp'
+public import Algorithm.Algebra.BigOperators.DFinsupp
 public import Algorithm.Data.Classes.Bag
 public import Algorithm.Data.Classes.DefaultDict
 public import Algorithm.Data.Classes.Dict
@@ -12,9 +12,9 @@ public import Algorithm.Data.Classes.MultiBag
 public import Algorithm.Data.Classes.ToFinset
 public import Algorithm.Data.Classes.ToList
 public import Algorithm.Data.Classes.ToMultiset
-public import Algorithm.Data.DFinsupp'.Basic
-public import Algorithm.Data.DFinsupp'.Defs
-public import Algorithm.Data.DFinsupp'.Fintype
+public import Algorithm.Data.DFinsupp.Basic
+public import Algorithm.Data.DFinsupp.Defs
+public import Algorithm.Data.DFinsupp.Fintype
 public import Algorithm.Data.Forest
 public import Algorithm.Data.Graph.AdjList
 public import Algorithm.Data.Graph.IsDFSForest

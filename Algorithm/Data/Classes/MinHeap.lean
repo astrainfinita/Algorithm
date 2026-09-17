@@ -9,6 +9,12 @@ public import Algorithm.Data.Classes.ToMultiset
 public import Mathlib.Data.Multiset.Lattice
 public import Mathlib.Order.WithBot
 
+/-!
+# Minimum heaps
+
+A minimum heap interface specified by its underlying multiset.
+-/
+
 @[expose] public section
 
 namespace Multiset -- should be in mathlb

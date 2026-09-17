@@ -7,6 +7,12 @@ module
 
 public import Algorithm.Data.Classes.Bag
 
+/-!
+# Hash sets
+
+Set-like collection instances for `Std.HashSet`.
+-/
+
 @[expose] public section
 
 variable {α : Type*} [BEq α] [Hashable α]

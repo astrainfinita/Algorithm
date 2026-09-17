@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Classes.ToMultiset
 public import Mathlib.Data.Finset.Card
 
+/-!
+# Finite set views of collections
+
+Finite set views compatible with collection membership and insertion.
+-/
+
 @[expose] public section
 
 variable {C α : Type*}

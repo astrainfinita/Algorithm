@@ -12,6 +12,12 @@ public import Mathlib.Logic.Function.Basic
 
 import Mathlib.Tactic.SplitIfs
 
+/-!
+# Indexed lookup and update
+
+Interfaces for indexed lookup, update, and erasure.
+-/
+
 @[expose] public section
 
 variable {C ι α : Type*} {Valid : C → ι → Prop}

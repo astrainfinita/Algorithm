@@ -11,6 +11,12 @@ public import Algorithm.Data.Classes.ToList
 public import Mathlib.Combinatorics.Quiver.Path
 public import Mathlib.Data.Finset.Union
 
+/-!
+# Graphs represented by adjacency lists
+
+Adjacency list interfaces and graph reachability.
+-/
+
 @[expose] public section
 
 structure AdjList

@@ -11,6 +11,12 @@ public import Algorithm.Data.Classes.ToList
 public import Mathlib.Data.Finset.Lattice.Fold
 public import Mathlib.Data.Prod.Lex
 
+/-!
+# Indexed minimum heaps
+
+Minimum heaps with indexed lookup and key decreases.
+-/
+
 @[expose] public section
 
 class IndexedMinHeap (C : Type*) [Inhabited C] (ι : outParam Type*)

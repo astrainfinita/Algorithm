@@ -6,9 +6,15 @@ Authors: Yuyang Zhao
 module
 
 public import Algorithm.Data.Classes.GetElem
-public import Algorithm.Data.DFinsupp'.Defs
+public import Algorithm.Data.DFinsupp.Defs
 public import Mathlib.Data.Fintype.Basic
 public import Mathlib.Data.Setoid.Basic
+
+/-!
+# Dictionaries with default values
+
+Dictionaries with finitely many entries differing from a specified default function.
+-/
 
 @[expose] public section
 

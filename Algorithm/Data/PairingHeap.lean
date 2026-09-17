@@ -11,6 +11,12 @@ public import Batteries.Data.PairingHeap
 import Mathlib.Algebra.Order.Group.Multiset
 import Mathlib.Tactic.Abel
 
+/-!
+# Pairing heap instances
+
+Lemmas about Batteries pairing heaps and their minimum heap interface.
+-/
+
 @[expose] public section
 
 namespace Batteries

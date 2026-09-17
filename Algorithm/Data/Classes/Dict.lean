@@ -8,6 +8,12 @@ module
 public import Algorithm.Data.Classes.Bag
 public import Algorithm.Data.Classes.DefaultDict
 
+/-!
+# Finite dictionaries
+
+Interfaces for finite dictionaries, with lookup, update, and erasure operations.
+-/
+
 @[expose] public section
 
 variable {C ι α : Type*}

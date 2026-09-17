@@ -9,6 +9,12 @@ public import Mathlib.Data.Set.Defs
 
 import Mathlib.Data.Set.Insert
 
+/-!
+# Forests
+
+Rooted forests with preorder and postorder traversals.
+-/
+
 @[expose] public section
 
 inductive Forest (α : Type*)
