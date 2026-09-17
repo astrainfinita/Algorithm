@@ -1,8 +1,6 @@
 [["defsWithUnderscore", "instInhabited_algorithm"],
  ["defsWithUnderscore", "Batteries.PairingHeap.instEmptyCollection_algorithm"],
  ["defsWithUnderscore", "Batteries.PairingHeap.instInsert_algorithm"],
- ["defsWithUnderscore", "Parser.Attr.getElem_simps"],
- ["defsWithUnderscore", "Parser.Attr.getElem_simps_proc"],
  ["defsWithUnderscore", "WithTop.instDecidableEqTop_algorithm"],
  ["docBlame", "AdjList"],
  ["docBlame", "AdjListClass"],

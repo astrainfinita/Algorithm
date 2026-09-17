@@ -27,8 +27,8 @@ variable [LawfulBEq α]
 instance : ToFinset (HashSet α) α where
   isEmpty := isEmpty
   isEmpty_iff_forall_not_mem := isEmpty_iff_forall_not_mem
-  toFinset c := ⟨c.toList, by simpa [List.Nodup] using c.inner.distinct_keys⟩
-  mem_toFinset := by simp [toList]; rfl
+  toFinset c := ⟨c.toList, by simpa [List.Nodup] using c.distinct_toList⟩
+  mem_toFinset := mem_toList
 
 instance : Size (HashSet α) where
   size := size

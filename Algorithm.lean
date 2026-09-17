@@ -1,4 +1,4 @@
-module  -- shake: keep-all
+module  -- shake: keep-all --deprecated_module: ignore
 
 public import Algorithm.Algebra.BigOperators.DFinsupp
 public import Algorithm.Data.Classes.Bag
