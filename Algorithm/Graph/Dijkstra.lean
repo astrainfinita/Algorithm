@@ -464,7 +464,7 @@ lemma dijkstraStep_fst_getElem' (g : G) (c : Info → CostType)
     split_ifs at h' with snde
     · simp [h']
     · exact absurd h' (h.resolve_left snde)
-  · push_neg at h
+  · push Not at h
     simp? [Function.update_apply, h, Multiset.filterMap_filterMap] says
       simp only [ne_eq, h, not_false_eq_true,
         Function.update_of_ne, Function.update_apply, Multiset.filterMap_filterMap]
@@ -523,7 +523,7 @@ lemma dijkstraStep_fst_getElem_eq_top (g : G) (c : Info → CostType)
   rw [← or_iff_not_imp_right]
   congr!
   rw [iff_not_comm]
-  push_neg
+  push Not
   rw [exists_true_iff_nonempty]
   rfl
 
@@ -775,7 +775,7 @@ lemma dijkstra_spec (g : G) (c : Info → CostType)
     rw [hv, isDist_top_iff]
     dsimp
     have := (spec.1.4 v).not
-    push_neg at this
+    push Not at this
     rw [this]
     have : v ∉ traversal g {v | (dijkstra g c DistArray init)[v] ≠ ⊤} ∅ := by simpa [traversal]
     convert this
