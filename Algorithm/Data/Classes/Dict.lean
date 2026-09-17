@@ -45,7 +45,7 @@ def Dict.toDefaultDict : C ≃ Dict.DefaultDict C := Equiv.refl _
 instance : Inhabited (Dict.DefaultDict C) where
   default := Dict.toDefaultDict ∅
 
-instance [Dict C ι α] : DefaultDict (Dict.DefaultDict C) ι (Option α) fun _ ↦ none where
+instance : DefaultDict (Dict.DefaultDict C) ι (Option α) fun _ ↦ none where
   getElem a i _ := (Dict.toDefaultDict.symm a)[i]?
   toDFinsupp' a := .mk' ((Dict.toDefaultDict.symm a)[·]?)
     (.mk ⟨toMultiset (Dict.toDefaultDict.symm a), fun i ↦ by

@@ -48,6 +48,7 @@ class GetSetElem (C : Type*) (ι : Type*) (α : outParam Type*)
     c[i ↦ x][j]'hs = c[j]'h
 export GetSetElem (valid_setElem getElem_setElem_self getElem_setElem_of_ne)
 
+set_option warning.simp.varHead false in -- These rules belong only to `getElem_simps`.
 attribute [getElem_simps] valid_setElem
 attribute [getElem_simps, simp] getElem_setElem_self getElem_setElem_of_ne
 
@@ -81,6 +82,7 @@ class GetSetEraseElem (C : Type*) (ι : Type*) (α : outParam Type*)
     (erase c i)[j]'hs = c[j]'h
 export GetSetEraseElem (valid_erase getElem_erase_of_ne)
 
+set_option warning.simp.varHead false in -- These rules belong only to `getElem_simps`.
 attribute [getElem_simps] valid_erase
 attribute [getElem_simps, simp] getElem_erase_of_ne
 

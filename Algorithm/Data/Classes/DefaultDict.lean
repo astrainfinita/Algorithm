@@ -112,7 +112,7 @@ instance : DefaultDict (DefaultDict.Quotient C) ι α fun _ ↦ d where
   getElem_setElem_of_ne q i v j := q.inductionOn (getElem_setElem_of_ne · v)
   getElem_default := getElem_default
   toDFinsupp' := Quotient.lift toDFinsupp' (fun _ _ ↦ by
-    simpa only [DFunLike.ext'_iff, coe_toDFinsupp'_eq_getElem] using id)
+    simpa only [Setoid.ker_def, DFunLike.ext'_iff, coe_toDFinsupp'_eq_getElem] using id)
   coe_toDFinsupp'_eq_getElem a := by
     induction a using Quotient.ind
     exact coe_toDFinsupp'_eq_getElem _

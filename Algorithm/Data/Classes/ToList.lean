@@ -212,6 +212,7 @@ class ToList.RandomAccess (C : Type*) (α : outParam Type*) (Valid : C → ℕ �
     (((valid_iff_lt_size.mp h).trans_eq (sizeTM_eq_size_toArray c)))
 export ToList.RandomAccess (valid_iff_lt_size getElem_eq_getElem_toArray)
 
+set_option warning.simp.varHead false in -- These rules belong only to `getElem_simps`.
 attribute [getElem_simps] valid_iff_lt_size
 
 section ToList
@@ -224,7 +225,7 @@ instance (priority := 100) LawfulAppend.toMergeable [Append C] [LawfulAppend C �
 
 lemma ToList.RandomAccess.getElem_toArray [GetElem C ℕ α Valid] [ToList.RandomAccess C α Valid]
     (c : C) (i : ℕ) (hi : i < (toArray c).size) :
-    (toArray c)[i]'hi = c[i]'(by simpa [getElem_simps, hi] using hi) :=
+    (toArray c)[i]'hi = c[i]'(by simpa [getElem_simps, length_toList] using hi) :=
   (getElem_eq_getElem_toArray c _ _).symm
 
 end ToList
