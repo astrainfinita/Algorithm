@@ -265,7 +265,6 @@ def union (self : UnionFind ι P S) (i j : ι) : UnionFind ι P S :=
     (by rw [← root_eq_self]; simp [fi, fj])
     (by rw [← root_eq_self]; simp [fi, fj])
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma union_root (self : UnionFind ι P S) (i j : ι) :
     (self.union i j).root = fun k ↦
@@ -273,7 +272,7 @@ lemma union_root (self : UnionFind ι P S) (i j : ι) :
         if self.size[self.root i] ≤ self.size[self.root j] then self.root j else self.root i
       else
         self.root k := by
-  simp [union]
+  simp [union]; rfl
 
 def WF (self : UnionFind ι P S) : Prop :=
   ∀ i : ι, self.parent[i] = i → self.size[i] = {j : ι | self.root j = i}.encard
