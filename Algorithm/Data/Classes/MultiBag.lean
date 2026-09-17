@@ -26,7 +26,7 @@ class MultiBag (C : Type*) (α : outParam Type*) extends
     Insert α C, ToMultiset.LawfulInsert C α,
     Erase C α, LawfulErase C α
 
-attribute [instance 100] MultiBag.ReadOnly.decidableMem
+attribute [instance_reducible, instance 100] MultiBag.ReadOnly.decidableMem
 
 attribute [simp] count_eq_count_toMultiset toMultiset_insert
 

@@ -146,6 +146,7 @@ def indicator (s : Finset ι) (f : ∀ i ∈ s, α) : C :=
 
 variable {C}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma getElem_indicator [DecidableEq ι] (s : Finset ι) (f : ∀ i ∈ s, α) (i) :
     (indicator C s f)[i] = if hi : i ∈ s then f i hi else d := by
   unfold indicator

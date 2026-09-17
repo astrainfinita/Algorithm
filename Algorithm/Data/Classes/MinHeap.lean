@@ -96,6 +96,7 @@ section LinearOrder
 
 variable {C α : Type*} [LinearOrder α] [MinHeap C α] {c : C}
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma head?_def : head? c = ((toMultiset c).map WithTop.some).inf := by
   by_cases hc : isEmpty c

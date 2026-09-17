@@ -14,6 +14,8 @@ class Bag.ReadOnly (C : Type*) (α : outParam Type*) extends
     ToFinset C α where
   [decidableMem : DecidableMem α C]
 
+attribute [instance_reducible] Bag.ReadOnly.decidableMem
+
 class Bag (C : Type*) (α : outParam Type*) extends
     Bag.ReadOnly C α,
     EmptyCollection C, LawfulEmptyCollection C α,

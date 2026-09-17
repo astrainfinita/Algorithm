@@ -114,6 +114,7 @@ lemma sizeTM_eq_size_toArray : sizeTM c = (toArray c).size := by simp [length_to
 @[simp]
 lemma coe_toList : ↑(toList c) = toMultiset c := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 lemma isEmpty_toList : (toList c).isEmpty = isEmpty c := by
   rw [isEmpty_eq_decide_sizeTM, List.isEmpty_eq_decide_length, sizeTM_eq_length_toList]
 
@@ -248,6 +249,7 @@ end List
 
 section Array
 
+set_option backward.isDefEq.respectTransparency false in
 instance : Front (Array α) α where
   front? c := c[0]?
   front?_def c := by
