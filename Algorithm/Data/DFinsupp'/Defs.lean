@@ -549,6 +549,7 @@ theorem support_eq_empty {f : Π₀' i, [β i, d i]} : f.support = ∅ ↔ f = d
 instance decidableDefault : DecidablePred (Eq (default : Π₀' i, [β i, d i])) := fun _ =>
   decidable_of_iff _ <| support_eq_empty.trans eq_comm
 
+set_option backward.isDefEq.respectTransparency false in
 theorem support_subset_iff {s : Set ι} {f : Π₀' i, [β i, d i]} :
     ↑f.support ⊆ s ↔ ∀ i ∉ s, f i = d i := by
   simp? [Set.subset_def] says simp only [Set.subset_def, SetLike.mem_coe, mem_support_toFun, ne_eq]

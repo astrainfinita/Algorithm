@@ -220,6 +220,7 @@ instance : Mergeable (PairingHeap α le) α where
   toMultiset_merge a x := by
     simp only [toMultiset, coe_toListUnordered_merge]
 
+set_option backward.isDefEq.respectTransparency false in
 instance [Preorder α] [Std.Total (α := α) (· ≤ ·)] [DecidableRel (α := α) (· ≤ ·)] :
     MinHeap (PairingHeap α (· ≤ ·)) α where
   head? x := x.head?.rec ⊤ WithTop.some
