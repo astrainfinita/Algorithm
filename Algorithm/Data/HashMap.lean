@@ -6,6 +6,7 @@ Authors: Yuyang Zhao
 module
 
 public import Algorithm.Data.Classes.Dict
+public import Std.Data.HashMap.Lemmas
 
 /-!
 # Hash maps

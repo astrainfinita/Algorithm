@@ -6,6 +6,7 @@ Authors: Yuyang Zhao
 module
 
 public import Algorithm.Data.Classes.Bag
+public import Std.Data.HashSet.Lemmas
 
 /-!
 # Hash sets
