@@ -103,7 +103,7 @@ lemma findAux_snd_getElem (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ 
   unfold findAux rootCore; dsimp
   split_ifs with hi
   · exact .inl rfl
-  · obtain (hj | rfl) := decEq i j
+  · obtain (hj | rfl) := Decidable.ne_or_eq i j
     · simp? [hj, - rootCore_parent] says
         simp only [findAux_fst, ne_eq, hj, not_false_eq_true, all_valid,
           getElem_setElem_of_ne]
@@ -223,7 +223,8 @@ lemma setParent_root (parent : P) (size : S) (wf : WellFounded fun i j : ι ↦ 
     (setParent parent size wf i j hi hj s).root k =
       if rootCore parent wf k = i then j else rootCore parent wf k := by
   unfold root rootCore; dsimp
-  obtain (hk | hk) := decEq parent[k] k <;> simp only [rootCore_parent, hk, ↓reduceIte]
+  obtain (hk | hk) := Decidable.ne_or_eq parent[k] k <;>
+    simp only [rootCore_parent, hk, ↓reduceIte]
   · have hik : i ≠ k := by aesop
     have : (setParent parent size wf i j hi hj s).parent[k] ≠ k := by
       simp [hik, hk]
@@ -259,7 +260,7 @@ lemma link_root (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i)
       else
         self.root k := by
   ext k; unfold link; dsimp
-  obtain (hij | rfl) := decEq i j
+  obtain (hij | rfl) := Decidable.ne_or_eq i j
   · rw [ite_eq_right hij]
     split_ifs with hk hs <;> aesop
   · aesop

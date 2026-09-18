@@ -2,7 +2,7 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.34.0"
+require "leanprover-community" / "mathlib" @ git "v4.35.0-rc1"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
@@ -17,13 +17,17 @@ abbrev algorithmLeanOptions := #[
     algorithmOnlyLinters.map fun s ↦ { s with name := `weak ++ s.name }
 
 package algorithm where
-  fixedToolchain := true
-  platformIndependent := true
-  restoreAllArtifacts := true
   testDriver := "AlgorithmTest"
   lintDriver := "batteries/runLinter"
   lintDriverArgs := #["Algorithm"]
+  -- Run the builtin linting steps in addition to the `lintDriver` set above.
   builtinLint := true
+  -- A version of Algorithm only supports the toolchain it is built with.
+  fixedToolchain := true
+  -- Allow oleans built on Linux CI to be used across platforms.
+  platformIndependent := true
+  -- Algorithm currently expects artifacts to be in the build directory.
+  restoreAllArtifacts := true
 
 @[default_target]
 lean_lib Algorithm where
