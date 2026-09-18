@@ -138,8 +138,8 @@ lemma getElem_listIndicator [DecidableEq ι] (l : List ι) (f : ∀ i ∈ l, α)
     split_ifs with h₁ h₂ h₂
     · simp [h₁]
     · simp [h₁] at h₂
-    · simp_rw [getElem_listIndicator, dif_pos (List.mem_of_ne_of_mem h₁ h₂)]
-    · simp_rw [getElem_listIndicator, dif_neg (List.not_mem_of_not_mem_cons h₂)]
+    · simp_rw [getElem_listIndicator, dite_eq_left (List.mem_of_ne_of_mem h₁ h₂)]
+    · simp_rw [getElem_listIndicator, dite_eq_right (List.not_mem_of_not_mem_cons h₂)]
 
 variable [Ext C ι α d]
 variable (C)
@@ -165,7 +165,7 @@ lemma getElem_indicator [DecidableEq ι] (s : Finset ι) (f : ∀ i ∈ s, α) (
 abbrev toOfFn [Fintype ι] (f : ι → α) : OfFn C ι α f where
   ofFn := indicator C Finset.univ (fun i _ ↦ f i)
   getElem_ofFn _ := by
-    convert (getElem_indicator _ _ _).trans <| dif_pos <| Finset.mem_univ _
+    convert (getElem_indicator _ _ _).trans <| dite_eq_left <| Finset.mem_univ _
     classical infer_instance
 
 end DefaultDict

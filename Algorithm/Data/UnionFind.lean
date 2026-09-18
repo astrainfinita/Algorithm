@@ -41,14 +41,14 @@ termination_by wf.wrap i
 
 lemma rootCore_of_eq (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k]) (i : ι)
     (hi : parent[i] = i) : rootCore parent wf i = i := by
-  rw [rootCore, if_pos hi]
+  rw [rootCore, ite_eq_left hi]
 
 @[simp]
 lemma rootCore_parent (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k]) (i : ι) :
     rootCore parent wf parent[i] = rootCore parent wf i := by
   conv_rhs => rw [rootCore]
   split_ifs with h
-  · rw [rootCore, h, if_pos h]
+  · rw [rootCore, h, ite_eq_left h]
   · rfl
 
 @[simp]
@@ -63,7 +63,7 @@ termination_by wf.wrap i
 lemma transGen_rootCore (parent : P) (wf : WellFounded fun j k : ι ↦ j ≠ k ∧ j = parent[k])
     (i : ι) (hi : parent[i] ≠ i) :
     Relation.TransGen (fun i j ↦ i ≠ j ∧ i = parent[j]) (rootCore parent wf i) i := by
-  rw [rootCore, if_neg hi, rootCore]
+  rw [rootCore, ite_eq_right hi, rootCore]
   split_ifs with h
   · exact .single ⟨hi, rfl⟩
   · rw [rootCore_parent]
@@ -260,7 +260,7 @@ lemma link_root (self : UnionFind ι P S) (i j : ι) (hi : self.parent[i] = i)
         self.root k := by
   ext k; unfold link; dsimp
   obtain (hij | rfl) := decEq i j
-  · rw [if_neg hij]
+  · rw [ite_eq_right hij]
     split_ifs with hk hs <;> aesop
   · aesop
 
@@ -314,7 +314,7 @@ lemma setParent_wf (self : UnionFind ι P S)
       rw [rootCore]
       split_ifs with h
       · rw [root_of_parent_eq _ _ h]; tauto
-      · rw [root, rootCore, if_neg h]; tauto
+      · rw [root, rootCore, ite_eq_right h]; tauto
   · simp [hk] at hjk
   · rw [h k hk]
     congr! 3

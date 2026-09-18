@@ -59,10 +59,10 @@ theorem filter_apply (p : ι → Prop) [DecidablePred p] (i : ι) (f : Π₀' i,
   rfl
 
 theorem filter_apply_pos {p : ι → Prop} [DecidablePred p] (f : Π₀' i, [β i, d i]) {i : ι}
-    (h : p i) : f.filter p i = f i := by simp only [filter_apply, if_pos h]
+    (h : p i) : f.filter p i = f i := by simp only [filter_apply, ite_eq_left h]
 
 theorem filter_apply_neg {p : ι → Prop} [DecidablePred p] (f : Π₀' i, [β i, d i]) {i : ι}
-    (h : ¬p i) : f.filter p i = d i := by simp only [filter_apply, if_neg h]
+    (h : ¬p i) : f.filter p i = d i := by simp only [filter_apply, ite_eq_right h]
 
 @[simp]
 theorem filter_default (p : ι → Prop) [DecidablePred p] :
@@ -111,11 +111,11 @@ theorem filter_single (p : ι → Prop) [DecidablePred p] (i : ι) (x : β i) :
 
 @[simp]
 theorem filter_single_pos {p : ι → Prop} [DecidablePred p] (i : ι) (x : β i) (h : p i) :
-    (single d i x).filter p = single d i x := by rw [filter_single, if_pos h]
+    (single d i x).filter p = single d i x := by rw [filter_single, ite_eq_left h]
 
 @[simp]
 theorem filter_single_neg {p : ι → Prop} [DecidablePred p] (i : ι) (x : β i) (h : ¬p i) :
-    (single d i x).filter p = default := by rw [filter_single, if_neg h]
+    (single d i x).filter p = default := by rw [filter_single, ite_eq_right h]
 
 theorem piecewise_single_erase (x : Π₀' i, [β i, d i]) (i : ι)
     [∀ i' : ι, Decidable <| (i' ∈ ({i} : Set ι))] : -- Porting note: added Decidable hypothesis

@@ -569,7 +569,8 @@ lemma dijkstraStep_spec (g : G) (c : Info → CostType)
     obtain ⟨d, h₂⟩ := h₂
     use min d <| (Finset.univ (α := ToQuiver.mk g (minIdx heap) ⟶ ToQuiver.mk g w)).inf
       fun e ↦ heap[minIdx heap] + c (e : E g).info
-    constructor; · rw [dijkstraStep_fst_getElem (spec₁ := h₁), if_neg (by tauto), h₂.1, min_assoc]
+    constructor
+    · rw [dijkstraStep_fst_getElem (spec₁ := h₁), ite_eq_right (by tauto), h₂.1, min_assoc]
     replace h₂ := h₂.2
     rw [isLeastOfEdges_congr (dijkstraStep_snd_support _ _ _ _ _)]
     rw [isLeastOfEdges_congr Set.union_singleton.symm]

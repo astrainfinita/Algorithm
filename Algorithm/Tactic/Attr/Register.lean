@@ -18,7 +18,8 @@ macro_rules
 | `(tactic| get_elem_tactic_extensible) =>
   `(tactic| simp +contextual only [getElem_simps,
     ne_eq, ite_true, ite_false, dite_true, dite_false,
-    ite_cond_eq_true, ite_cond_eq_false, dite_cond_eq_true, dite_cond_eq_false, ite_self,
+    ite_eq_left_of_eq_true, ite_eq_right_of_eq_false, dite_eq_left_of_eq_true,
+    dite_eq_right_of_eq_false, ite_self,
     and_true, true_and, and_false, false_and, and_self, and_not_self, not_and_self,
     and_imp, not_and, or_self, or_true, true_or, or_false, false_or,
     iff_self, iff_true, true_iff, iff_false, false_iff, false_implies, forall_false,
