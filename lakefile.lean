@@ -2,7 +2,7 @@ import Lake
 
 open Lake DSL
 
-require "leanprover-community" / "mathlib" @ git "v4.34.0-rc2"
+require "leanprover-community" / "mathlib" @ git "v4.34.0"
 
 abbrev algorithmOnlyLinters : Array LeanOption := #[
   ⟨`linter.mathlibStandardSet, true⟩,
@@ -23,6 +23,7 @@ package algorithm where
   testDriver := "AlgorithmTest"
   lintDriver := "batteries/runLinter"
   lintDriverArgs := #["Algorithm"]
+  builtinLint := true
 
 @[default_target]
 lean_lib Algorithm where

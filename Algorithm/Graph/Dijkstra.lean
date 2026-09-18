@@ -11,7 +11,7 @@ public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 public import Mathlib.Algebra.Order.Monoid.Unbundled.WithTop
 
 import Mathlib.Algebra.Order.Monoid.WithTop
-import Mathlib.Data.Set.Lattice
+import Mathlib.Data.Set.Lattice.Indexed
 import Mathlib.Tactic.Order
 
 /-!
