@@ -196,7 +196,7 @@ variable (d) in
 defined on this `Finset`. -/
 def mk (s : Finset ι) (x : ∀ i : (↑s : Set ι), β (i : ι)) : Π₀' i, [β i, d i] :=
   ⟨fun i => if H : i ∈ s then x ⟨i, H⟩ else d i,
-    Trunc.mk ⟨s.1, fun i => if H : i ∈ s then Or.inl H else Or.inr <| dif_neg H⟩⟩
+    Trunc.mk ⟨s.1, fun i => if H : i ∈ s then Or.inl H else Or.inr <| dite_eq_right H⟩⟩
 
 variable {s : Finset ι} {x : ∀ i : (↑s : Set ι), β i} {i : ι}
 
@@ -205,10 +205,10 @@ theorem mk_apply : (mk d s x : ∀ i, β i) i = if H : i ∈ s then x ⟨i, H⟩
   rfl
 
 theorem mk_of_mem (hi : i ∈ s) : (mk d s x : ∀ i, β i) i = x ⟨i, hi⟩ :=
-  dif_pos hi
+  dite_eq_left hi
 
 theorem mk_of_not_mem (hi : i ∉ s) : (mk d s x : ∀ i, β i) i = d i :=
-  dif_neg hi
+  dite_eq_right hi
 
 variable (d) in
 theorem mk_injective (s : Finset ι) : Function.Injective (@mk ι β d _ s) := by
@@ -217,7 +217,7 @@ theorem mk_injective (s : Finset ι) : Function.Injective (@mk ι β d _ s) := b
   have h1 : (mk d s x : ∀ i, β i) i = (mk d s y : ∀ i, β i) i := by rw [H]
   obtain ⟨i, hi : i ∈ s⟩ := i
   dsimp only [mk_apply, Subtype.coe_mk] at h1
-  simpa only [dif_pos hi] using h1
+  simpa only [dite_eq_left hi] using h1
 
 end mk
 
@@ -279,7 +279,7 @@ theorem single_eq_same {i b} : single d i b i = b := by
   simp only [single_apply, dite_eq_ite, ite_true]
 
 theorem single_eq_of_ne {i i' b} (h : i ≠ i') : single d i b i' = d i' := by
-  simp only [single_apply, dif_neg h]
+  simp only [single_apply, dite_eq_right h]
 
 theorem single_injective {i} : Function.Injective (single d i) := fun _ _ H =>
   Function.update_injective _ i <| DFunLike.coe_injective.eq_iff.mpr H
@@ -417,12 +417,12 @@ theorem erase_single (j : ι) (i : ι) (x : β i) :
 
 @[simp]
 theorem erase_single_same (i : ι) (x : β i) : (single d i x).erase i = default := by
-  rw [erase_single, if_pos rfl]
+  rw [erase_single, ite_eq_left rfl]
 
 @[simp]
 theorem erase_single_ne {i j : ι} (x : β i) (h : i ≠ j) :
     (single d i x).erase j = single d i x := by
-  rw [erase_single, if_neg h]
+  rw [erase_single, ite_eq_right h]
 
 @[simp]
 theorem update_eq_erase (f : Π₀' i, [β i, d i]) (i : ι) :
@@ -444,9 +444,10 @@ theorem single_zipWith_erase (f : ∀ i, β i → β i → β i)
     zipWith f (fun _ ↦ hf₁ _ _) (single d i (x i)) (x.erase i) = x :=
   ext fun i' =>
     if h : i = i' then by
-      subst h; simp only [zipWith_apply, single_apply, erase_apply, hf₂, dite_eq_ite, if_true]
+      subst h; simp only [zipWith_apply, single_apply, erase_apply, hf₂, dite_eq_ite, ite_true]
     else by
-      simp only [zipWith_apply, single_apply, erase_apply, dif_neg h, if_neg (Ne.symm h), hf₁]
+      simp only [zipWith_apply, single_apply, erase_apply, dite_eq_right h,
+        ite_eq_right (Ne.symm h), hf₁]
 
 protected theorem induction_on {p : (Π₀' i, [β i, d i]) → Prop} (x : Π₀' i, [β i, d i])
     (f : ∀ i, β i → β i → β i) (hf₁ : ∀ i x, f i (d i) x = x) (hf₂ : ∀ i x, f i x (d i) = x)
@@ -468,7 +469,7 @@ protected theorem induction_on {p : (Π₀' i, [β i, d i]) → Prop} (x : Π₀
       intro j
       cases H j with | _ H2
       · cases Multiset.mem_cons.1 H2 with | _ H3
-        · right; exact if_pos H3
+        · right; exact ite_eq_left H3
         · left; exact H3
       right
       split_ifs <;> [rfl; exact H2]

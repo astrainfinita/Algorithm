@@ -165,9 +165,9 @@ lemma isDFSForest_dfsForest' (g : G)
       (dfsForest' g vs visited).1 := by
   induction vs, visited using dfsForest'.induct g (BoolArray := BoolArray) with
   | case1 => unfold dfsForest'; constructor
-  | case2 _ _ _ h ih => rwa [dfsForest', if_pos h]
+  | case2 _ _ _ h ih => rwa [dfsForest', ite_eq_left h]
   | case3 visited v vs hv _ _ _ _ hc _ _ _ _ ih₁ ih₂ =>
-    rw [dfsForest', if_neg hv]
+    rw [dfsForest', ite_eq_right hv]
     let rc := dfsForest' g (succList g v) visited[v ↦ true]
     dsimp; apply IsDFSForest.node {v : V | rc.2.val[v]}
     · simp [hv]
@@ -322,13 +322,13 @@ lemma dfsTR_spec' (g : G)
   induction vs, visited using dfsTR.induct g (BoolArray := BoolArray) with
   | case1 => simp [dfsTR]
   | case2 _ v _ hv ih =>
-    simp only [dfsTR, if_pos hv, List.mem_cons]
+    simp only [dfsTR, ite_eq_left hv, List.mem_cons]
     rw [← ih]
     ext w
     simp [traversal]
     aesop
   | case3 _ _ _ hv ih =>
-    rw [dfsTR, if_neg hv, ← ih]
+    rw [dfsTR, ite_eq_right hv, ← ih]
     rw [visited_set_true, traversal_insert]
     · simp [hv]
     · ext; simp (config := { contextual := true })
